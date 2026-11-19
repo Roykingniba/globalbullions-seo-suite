@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}XML Sitemap Generator{% endblock %}
+{% block meta_description %}Generate a valid XML sitemap from a pasted list of URLs, ready to upload and submit to search engines.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🗺️ XML Sitemap Generator</h1>
+  <p>Paste your site's URLs (one per line, no limit) and generate a valid, ready-to-upload sitemap.xml.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="urls">URLs</label>
+  <textarea id="urls" name="urls" placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/blog">{{ urls_input }}</textarea>
+  <button class="btn" type="submit">Generate sitemap</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Generated sitemap.xml</h2>
+  <form method="post" action="{{ url_for('generators.sitemap_generator_download') }}" style="margin-bottom:14px;">
+    <input type="hidden" name="content" value="{{ result }}">
+    <button class="btn" type="submit">⬇️ Download sitemap.xml</button>
+  </form>
+  <pre style="white-space:pre-wrap; word-break:break-all; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:12px; max-height:400px; overflow:auto;">{{ result }}</pre>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

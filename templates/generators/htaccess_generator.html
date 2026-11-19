@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}.htaccess Redirect Generator{% endblock %}
+{% block meta_description %}Generate Apache .htaccess 301 redirect rules from a simple list of old-path to new-path pairs.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>⚙️ .htaccess Redirect Generator</h1>
+  <p>Generate Apache-compatible 301 redirect rules. Paste old and new paths as pairs and get ready-to-upload .htaccess rules, built for the same Apache-based shared hosting most SEO sites run on.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="pairs">Redirects (one per line, format: <code>/old-path -> /new-path</code>)</label>
+  <textarea id="pairs" name="pairs" placeholder="/old-page -> /new-page&#10;/blog/old-post -> /blog/new-post">{{ pairs_input }}</textarea>
+  <button class="btn" type="submit">Generate .htaccess rules</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Generated .htaccess rules</h2>
+  <pre style="white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px;">{{ result }}</pre>
+  <p class="hint">Append these lines to your existing .htaccess file (don't overwrite it). Usually located in your site's root directory.</p>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

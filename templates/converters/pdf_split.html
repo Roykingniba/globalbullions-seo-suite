@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}PDF Split Tool{% endblock %}
+{% block meta_description %}Split a PDF into individual pages, or extract a specific page range, no page limit.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>✂️ PDF Split</h1>
+  <p>Split every page into its own PDF (zipped together), or extract just a specific page range.</p>
+</div>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+<form class="tool-form" method="post" enctype="multipart/form-data">
+  <label for="pdf">PDF file</label>
+  <input type="file" id="pdf" name="pdf" accept="application/pdf" style="margin-bottom:14px;">
+
+  <label for="mode">Mode</label>
+  <select id="mode" name="mode" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); margin-bottom:14px;">
+    <option value="all" {% if mode == 'all' %}selected{% endif %}>Split every page into its own PDF (zip)</option>
+    <option value="range" {% if mode == 'range' %}selected{% endif %}>Extract a specific page range</option>
+  </select>
+
+  <label for="page_range">Page range (only used for "Extract a specific page range", e.g. 2-5)</label>
+  <input type="text" id="page_range" name="page_range" value="{{ page_range }}" placeholder="2-5">
+
+  <button class="btn" type="submit">Split &amp; download</button>
+</form>
+{% include "_tool_seo.html" %}
+{% endblock %}

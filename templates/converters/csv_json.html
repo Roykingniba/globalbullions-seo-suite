@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}CSV ⇄ JSON Converter{% endblock %}
+{% block meta_description %}Convert CSV to JSON or JSON to CSV, right in your browser.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔄 CSV ⇄ JSON Converter</h1>
+  <p>Paste CSV or JSON below and convert between the two formats.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="direction">Direction</label>
+  <select id="direction" name="direction" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); margin-bottom:14px;">
+    <option value="csv_to_json" {% if direction == 'csv_to_json' %}selected{% endif %}>CSV → JSON</option>
+    <option value="json_to_csv" {% if direction == 'json_to_csv' %}selected{% endif %}>JSON → CSV</option>
+  </select>
+
+  <label for="input_text">Input</label>
+  <textarea id="input_text" name="input_text" style="min-height:200px; font-family:monospace;" placeholder="Paste CSV or JSON here...">{{ input_text }}</textarea>
+
+  <button class="btn" type="submit">Convert</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Result</h2>
+  <form method="post" action="{{ url_for('converters.csv_json_download') }}" style="margin-bottom:14px;">
+    <input type="hidden" name="content" value="{{ result }}">
+    <input type="hidden" name="direction" value="{{ direction }}">
+    <button class="btn" type="submit">⬇️ Download</button>
+  </form>
+  <pre style="white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px; max-height:400px; overflow:auto;">{{ result }}</pre>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

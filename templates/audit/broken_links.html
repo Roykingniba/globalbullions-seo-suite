@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Broken Link Checker{% endblock %}
+{% block meta_description %}Crawl a single page's outbound links and report broken (4xx/5xx) or unreachable links.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🚧 Broken Link Checker</h1>
+  <p>Checks every outbound link on a page and reports broken or unreachable ones. No limit on the number of links checked.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Check links</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>{{ result.links_checked }} link(s) checked</h2>
+  <table class="result-table">
+    <thead><tr><th>URL</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      {% for r in result.results %}
+      <tr>
+        <td>{{ r.url }}</td>
+        <td>{{ r.status if r.status else (r.error or '-') }}</td>
+        <td>{% if r.broken %}<span class="badge badge-error">Broken</span>{% else %}<span class="badge badge-ok">OK</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

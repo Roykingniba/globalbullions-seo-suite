@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}URL Slug Generator{% endblock %}
+{% block meta_description %}Turn titles into clean URL slugs. Handles accents, punctuation and length limits, one line at a time.{% endblock %}
+{% block content %}
+{{ m.head("🔗", "URL Slug Generator", "Turn page titles into clean, readable URL slugs. Paste one title per line to convert a whole batch at once.") }}
+
+<form class="tool-form" method="post">
+  <label for="text">Titles, one per line</label>
+  <textarea id="text" name="text" style="min-height:170px;" placeholder="How to Bake Crème Brûlée at Home&#10;10 Tips for Faster Websites">{{ text }}</textarea>
+
+  <div class="opt-row">
+    <div>
+      <label for="separator">Word separator</label>
+      <select id="separator" name="separator">
+        <option value="-" {% if separator=='-' %}selected{% endif %}>Hyphen (recommended)</option>
+        <option value="_" {% if separator=='_' %}selected{% endif %}>Underscore</option>
+      </select>
+    </div>
+    <div>
+      <label for="max_length">Max length (blank for none)</label>
+      <input type="number" id="max_length" name="max_length" min="0" max="200" value="{{ max_length }}" placeholder="e.g. 60">
+    </div>
+  </div>
+
+  {{ m.check("lowercase", "Force lowercase", lowercase) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Generate slugs</button>
+</form>
+
+{% if results %}
+<div class="result-card">
+  <div class="out-head">
+    <h2>{{ results | length }} slug{{ 's' if results|length != 1 }}</h2>
+    <button class="btn btn-secondary btn-copy" type="button" data-copy="slug-list">Copy all</button>
+  </div>
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Original</th><th>Slug</th><th>Length</th></tr></thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>{{ r.source }}</td>
+          <td><code>{{ r.slug }}</code></td>
+          <td>{{ r.slug | length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <pre class="out-pre" id="slug-list" hidden>{% for r in results %}{{ r.slug }}
+{% endfor %}</pre>
+</div>
+{% endif %}
+
+<div class="where-card">
+  <h2>What makes a good slug</h2>
+  <ul>
+    <li>Use hyphens between words. Search engines read hyphens as spaces, underscores less reliably.</li>
+    <li>Keep it short and readable. Around 3 to 5 words is plenty, and a slug someone can read aloud is easier to share.</li>
+    <li>Drop filler words like "a", "the" and "of" when they add nothing.</li>
+    <li>Accented letters are converted to their plain equivalents, so "Crème Brûlée" becomes "creme-brulee" instead of losing those words entirely.</li>
+    <li>Once a page is live, changing its slug changes its URL. Set up a redirect from the old address or you will lose the traffic and links pointing at it.</li>
+  </ul>
+</div>
+
+{{ m.where([
+  'Publishing a new post? Copy the headline from your draft and paste it above, then use the slug as the URL in WordPress, Ghost or whichever tool you publish with.',
+  'Planning a batch of pages? Paste the whole list of working titles at once, one per line, and you get every slug in a single pass.',
+  'Auditing pages you already have? Export your URLs from Google Search Console under Pages, or from your sitemap, and compare the existing slugs with what this produces.',
+  'Set a max length if your site truncates long URLs. The tool trims at a word boundary rather than cutting a word in half.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

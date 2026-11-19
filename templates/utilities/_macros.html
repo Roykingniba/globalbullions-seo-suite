@@ -1,0 +1,38 @@
+{# Shared building blocks for the Text and Data Utilities tools. #}
+
+{# Page header. #}
+{% macro head(icon, title, blurb) %}
+<div class="tool-page-header">
+  <h1>{{ icon }} {{ title }}</h1>
+  <p>{{ blurb }}</p>
+</div>
+{% endmacro %}
+
+{# An output panel with a copy button. `id` must be unique on the page. #}
+{% macro output(text, label="Result", id="out") %}
+<div class="result-card">
+  <div class="out-head">
+    <h2>{{ label }}</h2>
+    <button class="btn btn-secondary btn-copy" type="button" data-copy="{{ id }}">Copy</button>
+  </div>
+  <pre class="out-pre" id="{{ id }}">{{ text }}</pre>
+</div>
+{% endmacro %}
+
+{# A labelled checkbox that keeps its state across submits. #}
+{% macro check(name, label, checked) %}
+<label class="opt">
+  <input type="checkbox" name="{{ name }}" {% if checked %}checked{% endif %}>
+  <span>{{ label }}</span>
+</label>
+{% endmacro %}
+
+{# "Where do I get this?" panel. Every tool explains what to paste in. #}
+{% macro where(items) %}
+<div class="where-card">
+  <h2>Where to get this data</h2>
+  <ol>
+    {% for item in items %}<li>{{ item | safe }}</li>{% endfor %}
+  </ol>
+</div>
+{% endmacro %}

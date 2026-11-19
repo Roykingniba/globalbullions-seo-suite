@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Canonical & Hreflang Checker{% endblock %}
+{% block meta_description %}Inspect canonical tags and hreflang annotations for conflicts, missing self-references, and reciprocity errors.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🌐 Canonical &amp; Hreflang Checker</h1>
+  <p>Fetch a page and inspect its canonical tag and hreflang annotations for common mistakes.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Check</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Canonical tag</h2>
+  <p>{{ result.canonical or "None found" }}</p>
+</div>
+
+<div class="result-card">
+  <h2>Hreflang tags ({{ result.hreflang|length }})</h2>
+  {% if result.hreflang %}
+  <table class="result-table">
+    <thead><tr><th>hreflang</th><th>href</th></tr></thead>
+    <tbody>
+      {% for h in result.hreflang %}
+      <tr><td>{{ h.hreflang }}</td><td>{{ h.href }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No hreflang tags found.</p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h2>Issues</h2>
+  {% if result.issues %}
+  <ul>{% for issue in result.issues %}<li><span class="badge badge-warn">Flag</span> {{ issue }}</li>{% endfor %}</ul>
+  {% else %}
+  <p><span class="badge badge-ok">No issues found</span></p>
+  {% endif %}
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

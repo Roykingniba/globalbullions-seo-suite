@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}AI Crawler Access Checker{% endblock %}
+{% block meta_description %}Check robots.txt against GPTBot, ClaudeBot, PerplexityBot, Google-Extended and other AI crawlers to see who can access your content.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🤖 AI Crawler Access Checker</h1>
+  <p>Checks your robots.txt against the major AI crawlers (ChatGPT, Claude, Perplexity, Google Gemini/AI Overviews, and more). A gap most SEO audit tools still miss.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Site URL (homepage)</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com">
+  <button class="btn" type="submit">Check access</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>{{ result.robots_url }}
+    {% if result.robots_found %}<span class="badge badge-ok">Found</span>{% else %}<span class="badge badge-warn">Not found (all crawlers allowed by default)</span>{% endif %}
+  </h2>
+  <p><strong>{{ result.allowed_count }}/{{ result.total_count }}</strong> AI crawlers can access this site.</p>
+  <table class="result-table">
+    <thead><tr><th>Crawler</th><th>Belongs to</th><th>Access</th></tr></thead>
+    <tbody>
+      {% for r in result.results %}
+      <tr>
+        <td>{{ r.agent }}</td>
+        <td>{{ r.description }}</td>
+        <td>{% if r.allowed %}<span class="badge badge-ok">Allowed</span>{% else %}<span class="badge badge-error">Blocked</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

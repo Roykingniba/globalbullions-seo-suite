@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}llms.txt Generator{% endblock %}
+{% block meta_description %}Crawl a sitemap and generate a spec-compliant llms.txt file summarizing your site for AI assistants.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>📄 llms.txt Generator</h1>
+  <p>Generates a <a href="https://llmstxt.org/" target="_blank" rel="noopener">llms.txt</a>-spec file from your sitemap. A Markdown summary AI assistants can read to understand your site, with no page limit.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Site URL (homepage)</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com">
+  <label for="site_name">Site name (optional, used as the heading)</label>
+  <input type="text" id="site_name" name="site_name" value="{{ site_name }}" placeholder="Defaults to the domain name">
+  <button class="btn" type="submit">Generate llms.txt</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Generated llms.txt. {{ result.pages_included }} page(s)</h2>
+  <form method="post" action="{{ url_for('geo.llms_txt_download') }}" style="margin-bottom:14px;">
+    <input type="hidden" name="content" value="{{ result.content }}">
+    <button class="btn" type="submit">⬇️ Download llms.txt</button>
+  </form>
+  <pre style="white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px;">{{ result.content }}</pre>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

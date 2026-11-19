@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Colour Converter (HEX, RGB, HSL){% endblock %}
+{% block meta_description %}Convert a colour between HEX, RGB and HSL, with contrast ratios and ready-made tints and shades.{% endblock %}
+{% block content %}
+{{ m.head("🎨", "Colour Converter", "Convert a colour between HEX, RGB and HSL, check its contrast, and get a set of tints and shades to build with.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="value">Colour</label>
+  <input type="text" id="value" name="value" value="{{ value }}" placeholder="#3b82f6, rgb(59 130 246), hsl(217 91% 60%) or teal">
+  <p class="hint">Accepts HEX with 3, 4, 6 or 8 digits, rgb() and hsl() in old or new syntax, and common colour names.</p>
+  <button class="btn" type="submit">Convert</button>
+</form>
+
+{% if color %}
+<div class="result-card">
+  <div class="swatch-row">
+    <div class="swatch-big" style="background:{{ color.hex }}; color:{{ color.best_text }};">{{ color.hex }}</div>
+    <div class="swatch-vals">
+      <div class="table-scroll">
+        <table class="result-table">
+          <tbody>
+            <tr><th>HEX</th><td><code>{{ color.hex }}</code></td></tr>
+            {% if color.alpha < 1 %}<tr><th>HEX with alpha</th><td><code>{{ color.hex_alpha }}</code></td></tr>{% endif %}
+            <tr><th>RGB</th><td><code>{{ color.rgb }}</code></td></tr>
+            <tr><th>RGB (legacy)</th><td><code>{{ color.rgb_legacy }}</code></td></tr>
+            <tr><th>RGBA</th><td><code>{{ color.rgba }}</code></td></tr>
+            <tr><th>HSL</th><td><code>{{ color.hsl }}</code></td></tr>
+            <tr><th>HSL (legacy)</th><td><code>{{ color.hsl_legacy }}</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="result-card">
+  <h2>Contrast</h2>
+  <div class="stat-grid">
+    <div class="stat"><b>{{ color.contrast_white }}:1</b><span>Against white</span></div>
+    <div class="stat"><b>{{ color.contrast_black }}:1</b><span>Against black</span></div>
+    <div class="stat"><b>{{ color.best_text }}</b><span>Better text colour</span></div>
+  </div>
+  <p class="hint" style="margin-top:12px;">
+    Accessibility guidelines ask for at least <strong>4.5:1</strong> for normal body text and <strong>3:1</strong> for
+    large text, meaning 18pt and up or 14pt bold. If neither number above clears 4.5, this colour will not work as a
+    text colour on a plain background, though it may still be fine for a border or a decorative block.
+  </p>
+</div>
+
+<div class="result-card">
+  <h2>Shades and tints</h2>
+  <p class="hint">Shades mix in black, tints mix in white. Handy for hover states, borders and backgrounds that need to
+     sit alongside your main colour.</p>
+  <div class="ramp">
+    {% for s in color.shades | reverse %}<div class="ramp-cell" style="background:{{ s }};" title="{{ s }}"><span>{{ s }}</span></div>{% endfor %}
+    <div class="ramp-cell ramp-base" style="background:{{ color.hex }}; color:{{ color.best_text }};" title="{{ color.hex }}"><span>{{ color.hex }}</span></div>
+    {% for t in color.tints %}<div class="ramp-cell" style="background:{{ t }}; color:#000;" title="{{ t }}"><span>{{ t }}</span></div>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="where-card">
+  <h2>Which format to use where</h2>
+  <ul>
+    <li><strong>HEX</strong> is the most common in design handoffs and CSS. Compact but hard to adjust by eye.</li>
+    <li><strong>RGB</strong> maps directly to how a screen mixes light. Useful when you need a specific channel value.</li>
+    <li><strong>HSL</strong> is the easiest to reason about. Hue is the colour, saturation is how vivid it is, and
+        lightness is how bright. To build a hover state, keep hue and saturation and drop the lightness by ten percent.</li>
+  </ul>
+</div>
+
+{{ m.where([
+  'Have a brand colour from a design file? In Figma, select the shape and copy the hex from the fill panel. In Photoshop or Illustrator, double click the colour swatch to see the hex value.',
+  'Picking a colour off an existing page? Right click, choose Inspect, and look for the colour value in the styles panel. Your browser also has an eyedropper in that colour picker.',
+  'Working from a logo image? Open it in any image editor and use the eyedropper tool, then read the hex value from the colour picker.',
+  'Checking whether text will be readable? Convert your text colour here and look at the contrast numbers. For a full page audit, browser developer tools flag low-contrast text automatically in the Accessibility panel.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

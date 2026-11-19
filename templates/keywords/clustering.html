@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Keyword Clustering Tool{% endblock %}
+{% block meta_description %}Group a flat keyword list into topic clusters based on shared significant words. No ML, no external data, fully deterministic.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🧮 Keyword Clustering Tool</h1>
+  <p>Paste a flat list of keywords and group them into topic clusters based on shared significant words. A fast way to turn a messy keyword export into a content-silo plan.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="keywords">Keywords (one per line. No limit)</label>
+  <textarea id="keywords" name="keywords" placeholder="content grader tool&#10;content optimization software&#10;keyword density checker&#10;best content grader for seo">{{ keywords_input }}</textarea>
+  <button class="btn" type="submit">Cluster keywords</button>
+</form>
+
+{% if clusters %}
+<div class="result-card">
+  <h2>{{ clusters|length }} cluster(s) found</h2>
+</div>
+{% for c in clusters %}
+<div class="result-card">
+  <h3>{{ c.label }} <span class="badge badge-ok">{{ c.keywords|length }}</span></h3>
+  <ul>{% for kw in c.keywords %}<li>{{ kw }}</li>{% endfor %}</ul>
+</div>
+{% endfor %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

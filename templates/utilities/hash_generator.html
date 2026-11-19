@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Hash Generator (MD5, SHA-1, SHA-256){% endblock %}
+{% block meta_description %}Generate MD5, SHA-1, SHA-256, SHA-384 and SHA-512 hashes from any text.{% endblock %}
+{% block content %}
+{{ m.head("#️⃣", "Hash Generator", "Produce MD5, SHA-1 and SHA-2 hashes from any text. Useful for checking that two files or values match.") }}
+
+<form class="tool-form" method="post">
+  <label for="text">Your text</label>
+  <textarea id="text" name="text" style="min-height:150px; font-family:ui-monospace, monospace;" placeholder="Paste the text you want to hash...">{{ text }}</textarea>
+
+  <label>Algorithms</label>
+  <div class="opt-inline">
+    {% for a in algos %}
+    <label class="opt"><input type="checkbox" name="algos" value="{{ a }}" checked><span>{{ a.upper() }}</span></label>
+    {% endfor %}
+  </div>
+  <button class="btn" type="submit" style="margin-top:14px;">Generate hashes</button>
+</form>
+
+{% if hashes %}
+<div class="result-card">
+  <h2>Hashes</h2>
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Algorithm</th><th>Bits</th><th>Digest</th></tr></thead>
+      <tbody>
+        {% for h in hashes %}
+        <tr>
+          <td><strong>{{ h.algo }}</strong></td>
+          <td>{{ h.bits }}</td>
+          <td><code style="word-break:break-all;">{{ h.digest }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="where-card">
+  <h2>Which one should you use</h2>
+  <p>A hash turns any input into a fixed-length fingerprint. Change one character of the input and the output changes
+     completely, which is what makes hashes useful for spotting differences.</p>
+  <ul>
+    <li><strong>SHA-256</strong> is the sensible default. Use it unless something specifically asks for another.</li>
+    <li><strong>MD5 and SHA-1</strong> are broken for security purposes. Researchers can deliberately produce two
+        different inputs with the same hash. They are still fine for non-security jobs like spotting duplicate files,
+        and you will still meet them because plenty of older systems publish MD5 checksums.</li>
+  </ul>
+  <p><strong>Do not hash passwords with these.</strong> Password storage needs a slow algorithm built for the job, such
+     as bcrypt, scrypt or Argon2. The algorithms here are fast by design, which is exactly what you do not want when
+     someone is trying to guess their way through a stolen database.</p>
+  <p>Hashing only goes one way. There is no button to turn a hash back into the original text.</p>
+</div>
+
+{{ m.where([
+  'Verifying a download? The site you downloaded from usually publishes a checksum next to the link. Compare it with the hash of your file.',
+  'Comparing two versions of a text? Hash both and see whether the digests match. Identical digests mean identical input, right down to invisible whitespace.',
+  'Given a hash to match? Paste the original text here, generate with the same algorithm, and compare the two strings.',
+  'Note that this hashes text, not uploaded files. To check a file, open it in a plain text editor and paste the contents, which works for text files but not for images or binaries.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

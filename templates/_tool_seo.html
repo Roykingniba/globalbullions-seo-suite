@@ -1,0 +1,51 @@
+{# Long-form SEO content block, included at the bottom of every tool page.
+   Driven by `seo` (injected via app.py's context processor from seo_content.py),
+   keyed off the current active_tool. Keeps every tool template identical at
+   the bottom while content stays centralized and easy to maintain. #}
+{% if seo %}
+<section class="seo-content">
+  {{ seo.intro_html | safe }}
+
+  {% for section in seo.sections %}
+  <h2>{{ section.heading }}</h2>
+  {{ section.html | safe }}
+  {% endfor %}
+
+  {% if seo.faqs %}
+  <h2>Frequently Asked Questions</h2>
+  {% for f in seo.faqs %}
+  <div class="faq-item">
+    <h3>{{ f.q }}</h3>
+    <p>{{ f.a }}</p>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if seo.related %}
+  <h2>Related Tools</h2>
+  <ul class="related-tools">
+    {% for r in seo.related %}
+    <li><a href="{{ url_for(r.endpoint) }}">{{ r.name }}<span>{{ r.blurb }}</span></a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+{% if seo.faqs %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for f in seo.faqs %}
+    {
+      "@type": "Question",
+      "name": {{ f.q | tojson }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ f.a | tojson }} }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% endif %}

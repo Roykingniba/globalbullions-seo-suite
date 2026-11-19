@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Broken-Link Outreach Finder{% endblock %}
+{% block meta_description %}Scan resource and "further reading" pages in bulk for broken outbound links. Ready-made link-building outreach opportunities.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔗 Broken-Link Outreach Finder</h1>
+  <p>Paste a batch of resource or "further reading" pages. This scans every one for broken outbound links, the classic broken-link-building outreach opportunity, all in one pass.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="pages">Resource pages (one per line. No limit)</label>
+  <textarea id="pages" name="pages" placeholder="example.com/resources&#10;example.com/further-reading">{{ pages_input }}</textarea>
+  <button class="btn" type="submit">Scan for broken links</button>
+</form>
+
+{% if results %}
+{% for r in results %}
+<div class="result-card">
+  <h3>{{ r.page }}</h3>
+  {% if r.error %}
+  <p><span class="badge badge-error">Couldn't fetch</span> {{ r.error }}</p>
+  {% elif r.broken_links %}
+  <p><span class="badge badge-error">{{ r.broken_links|length }} broken link(s) found</span></p>
+  <table class="result-table">
+    <thead><tr><th>Broken URL</th><th>Anchor text</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for link in r.broken_links %}
+      <tr><td>{{ link.url }}</td><td>{{ link.anchor_text }}</td><td>{{ link.status if link.status else (link.error or '-') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p><span class="badge badge-ok">No broken links found</span></p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

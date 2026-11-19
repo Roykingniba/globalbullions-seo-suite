@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Kai SEO Suite by Royking Niba. Free SEO & AI-Search Tools{% endblock %}
+{% block content %}
+{% set tool_total = categories | map(attribute='tools') | map('length') | sum %}
+
+<section class="hero">
+  <h1>Free SEO &amp; AI-Search Tools</h1>
+  <p>{{ tool_total }} working tools across {{ categories | length }} categories. Outreach, technical audits,
+     content optimisation and generative-engine (GEO) readiness. No account, no credits, no upsells.</p>
+
+  <div class="hero-stats">
+    <span>{{ tool_total }} tools</span>
+    <span>No sign-up</span>
+    <span>No rate limits</span>
+    <span>Free forever</span>
+  </div>
+
+  <div class="tool-search-wrap">
+    <span class="tool-search-icon" aria-hidden="true">🔎</span>
+    <label class="skip-link" for="tool-search">Search tools</label>
+    <input type="search" id="tool-search" class="tool-search" autocomplete="off"
+           placeholder="Search {{ tool_total }} tools. Try “sitemap”, “pdf”, “keyword”…">
+  </div>
+
+  <nav class="cat-chips" aria-label="Jump to category">
+    {% for cat in categories %}
+    <a class="cat-chip" href="#{{ cat.slug }}">{{ cat.icon }} {{ cat.name }}</a>
+    {% endfor %}
+  </nav>
+</section>
+
+<a class="promo-band" href="{{ url_for('kai_mcp.landing') }}">
+  <span class="promo-tag">New</span>
+  <span class="promo-text"><strong>KAI MCP for WordPress.</strong> Connect Claude or ChatGPT to your site and let it publish, edit and fix things for you. Free download.</span>
+  <span class="promo-arrow" aria-hidden="true">&rarr;</span>
+</a>
+
+<p class="search-empty" id="search-empty">
+  No tools match that search. Try a broader term. Or
+  <a href="#" id="search-clear">show all {{ tool_total }} tools</a>.
+</p>
+
+{% for cat in categories %}
+<section class="tool-category cat-{{ cat.slug }}" id="{{ cat.slug }}">
+  <h2>
+    <span aria-hidden="true">{{ cat.icon }}</span>
+    {{ cat.name }}
+    <span class="cat-count">{{ cat.tools | length }}</span>
+  </h2>
+  <div class="tool-grid">
+    {% for tool in cat.tools %}
+    <a class="tool-card cat-{{ cat.slug }}" href="{{ url_for(tool.endpoint) }}"
+       data-name="{{ tool.name | lower }}" data-desc="{{ tool.description | lower }}">
+      <h3>{{ tool.name }}</h3>
+      <p>{{ tool.description }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

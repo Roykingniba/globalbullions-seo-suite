@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block meta_description %}Sign in to your Kai SEO Suite account.{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Sign in</h1>
+    <p class="auth-sub">Access your dashboard, connected sites and scheduled posts.</p>
+
+    {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+    <form method="post" novalidate>
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ email }}"
+             autocomplete="username" required autofocus>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password"
+             autocomplete="current-password" required>
+      <p class="hint auth-forgot"><a href="{{ url_for('auth.forgot_password', email=email) if email else url_for('auth.forgot_password') }}">Forgot your password?</a></p>
+
+      <button class="btn auth-btn" type="submit">Sign in</button>
+    </form>
+
+    <p class="auth-alt">New here? <a href="{{ url_for('auth.signup', next=next) if next else url_for('auth.signup') }}">Create an account</a></p>
+  </div>
+
+  <p class="auth-note">
+    All the tools on this site stay free and need no account. Signing in is only
+    required for features that keep state for you, such as connected WordPress
+    sites and scheduled posts.
+  </p>
+</div>
+{% endblock %}

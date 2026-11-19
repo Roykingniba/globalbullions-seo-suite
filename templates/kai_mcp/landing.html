@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+{% block title %}WordPress MCP Server Plugin for Claude and ChatGPT | KAI MCP{% endblock %}
+{% block meta_description %}KAI MCP is a free WordPress MCP server plugin. Connect Claude, ChatGPT, Cursor or Claude Code and let AI edit posts, pages and WooCommerce, with approvals and undo.{% endblock %}
+{% block og_image %}{{ site_url }}{{ url_for('static', filename='img/kai-mcp/kai-mcp-og.jpg') }}{% endblock %}
+
+{% block schema_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "KAI MCP for WordPress",
+  "alternateName": "KAI Vibe",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "WordPress plugin",
+  "operatingSystem": "WordPress {{ (plugin.requires_wp if plugin and plugin.requires_wp else '6.4') }} or later",
+  {% if plugin and plugin.version %}"softwareVersion": {{ plugin.version | tojson }},{% endif %}
+  "softwareRequirements": "WordPress {{ (plugin.requires_wp if plugin and plugin.requires_wp else '6.4') }}+, PHP {{ (plugin.requires_php if plugin and plugin.requires_php else '7.4') }}+, HTTPS",
+  "description": "A WordPress plugin that turns a site into a Model Context Protocol (MCP) server, so AI assistants such as Claude, ChatGPT, Claude Code and Cursor can read and manage it with the permissions of the WordPress user who approved them.",
+  "featureList": "89 MCP tools for posts, pages, page builders, media, menus, comments, users, WooCommerce, files and maintenance; OAuth connection; approval queue for risky actions; one-click undo; activity log",
+  "screenshot": [
+    {{ (site_url ~ url_for('static', filename='img/kai-mcp/kai-vibe-connect-screen.webp')) | tojson }},
+    {{ (site_url ~ url_for('static', filename='img/kai-mcp/kai-vibe-approve-connection.webp')) | tojson }},
+    {{ (site_url ~ url_for('static', filename='img/kai-mcp/kai-vibe-approval-queue.webp')) | tojson }},
+    {{ (site_url ~ url_for('static', filename='img/kai-mcp/kai-vibe-undo-changes.webp')) | tojson }}
+  ],
+  "url": {{ (site_url ~ request.path) | tojson }},
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Royking Niba" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ (site_url ~ "/") | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": "KAI MCP for WordPress", "item": {{ (site_url ~ request.path) | tojson }} }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for f in faqs %}
+    { "@type": "Question", "name": {{ f.q | tojson }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ f.a | striptags | tojson }} } }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% set download_url = url_for('kai_mcp.get_plugin') %}
+{% set file_url = url_for('kai_mcp.download') %}
+{% set signup_url = url_for('auth.signup', next=download_url) %}
+{% set img = 'img/kai-mcp/' %}
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ url_for('home') }}">Home</a>
+  <span class="breadcrumb-sep">/</span>
+  <span class="breadcrumb-current">KAI MCP for WordPress</span>
+</nav>
+
+<section class="hero kai-hero">
+  <p class="eyebrow">Free WordPress MCP server plugin</p>
+  <h1>WordPress MCP server: let Claude or ChatGPT work on your site</h1>
+  <p>KAI MCP turns your WordPress site into an MCP server. Connect Claude, ChatGPT, Claude Code or Cursor, then ask in
+     plain language: write a post, fix a broken page, update product prices, add missing alt text. The assistant does
+     the work inside WordPress, risky actions wait for your approval, and every change can be undone.</p>
+
+  <div class="kai-cta">
+    {% if user %}
+    <a class="btn btn-lg" href="{{ download_url }}">Download KAI MCP{% if plugin and plugin.version %} v{{ plugin.version }}{% endif %}</a>
+    {% else %}
+    <a class="btn btn-lg" href="{{ signup_url }}">Create a free account to download</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login', next=download_url) }}">Sign in</a>
+    {% endif %}
+  </div>
+  <div class="hero-stats">
+    <span>Free download</span>
+    <span>89 tools</span>
+    <span>Claude, ChatGPT, Cursor</span>
+    <span>WordPress {{ plugin.requires_wp if plugin and plugin.requires_wp else '6.4' }}+</span>
+    <span>PHP {{ plugin.requires_php if plugin and plugin.requires_php else '7.4' }}+</span>
+  </div>
+
+  <figure class="kai-shot kai-shot-hero">
+    <img src="{{ url_for('static', filename=img ~ 'kai-vibe-connect-screen.webp') }}" width="1600" height="1025"
+         alt="KAI MCP Connect screen in WordPress showing the site's MCP server address and step-by-step instructions for connecting Claude">
+  </figure>
+</section>
+
+<section class="kai-section">
+  <h2>What is a WordPress MCP server?</h2>
+  <div class="kai-prose">
+    <p>A WordPress MCP server is a connection point that lets an AI assistant use your site directly. MCP (Model Context
+       Protocol) is the open standard that Claude, ChatGPT, Cursor and other assistants use to connect to outside tools.
+       Once your site is an MCP server, the assistant can read your content and carry out admin tasks itself, instead of
+       telling you which buttons to click.</p>
+    <p>KAI MCP is a WordPress plugin that adds that server to your site. It is served by WordPress itself at
+       <code>https://yoursite.com/wp-json/kai-vibe/v1/mcp</code>. There is no third-party service in the middle and no
+       account with us is needed to run it: your site talks straight to the assistant you choose.</p>
+  </div>
+</section>
+
+{% if thanks %}
+<section class="kai-thanks result-card" id="thank-you" role="status">
+  <div class="kai-thanks-icon" aria-hidden="true">&#10003;</div>
+  <div>
+    <h2>Thank you for downloading KAI MCP{% if plugin.version %} v{{ plugin.version }}{% endif %}</h2>
+    <p>Your download of <strong>{{ plugin.download_name }}</strong> ({{ plugin.size_kb }} KB) has started.
+       If it did not, <a href="{{ file_url }}">click here to download it</a>.</p>
+    <p>Next, follow the five steps below to install it and connect Claude, ChatGPT or another assistant to your site.</p>
+    <a class="btn" href="#how-to-use">Show me how to set it up</a>
+  </div>
+</section>
+<iframe src="{{ file_url }}" title="KAI MCP download" hidden style="display:none" aria-hidden="true"></iframe>
+{% endif %}
+
+<section class="kai-section" id="how-to-use">
+  <h2>How to connect WordPress to Claude or ChatGPT with KAI MCP</h2>
+  <p class="kai-lead">Setup takes about five minutes and needs no code, API key or configuration file.</p>
+
+  <ol class="kai-walk">
+    <li class="kai-walk-step">
+      <div class="kai-walk-text">
+        <h3>Install the plugin</h3>
+        <p>Download the zip from this page. In wp-admin go to <strong>Plugins, Add New, Upload Plugin</strong>, choose the
+           zip, then <strong>Install Now</strong> and <strong>Activate</strong>. It appears in your dashboard menu as
+           <em>KAI Vibe</em>.</p>
+        <p class="kai-small">Your site must use HTTPS. The plugin refuses connections over an unencrypted link, because a key would be readable in transit. Most hosts include a free SSL certificate.</p>
+      </div>
+    </li>
+    <li class="kai-walk-step">
+      <div class="kai-walk-text">
+        <h3>Copy your website address for AI</h3>
+        <p>Open <strong>KAI Vibe, Connect</strong>. The top box shows one line, your site's MCP address. Press
+           <strong>Copy</strong>. That line is everything the assistant needs.</p>
+      </div>
+      <figure class="kai-shot">
+        <img src="{{ url_for('static', filename=img ~ 'kai-vibe-connect-screen.webp') }}" width="1600" height="1025" loading="lazy"
+             alt="KAI Vibe Connect screen with the Copy button next to the website address for AI">
+        <figcaption>The Connect screen: copy the address, then follow the steps for your app.</figcaption>
+      </figure>
+    </li>
+    <li class="kai-walk-step">
+      <div class="kai-walk-text">
+        <h3>Add it to your assistant</h3>
+        <div class="kai-apps">
+          <div>
+            <h4>Claude</h4>
+            <p>Settings, then Connectors, then <em>Add custom connector</em>. Give it any name and paste the address into the URL box.</p>
+          </div>
+          <div>
+            <h4>ChatGPT</h4>
+            <p>Settings, then Connectors, and add one. Paste the address as the server URL and choose OAuth if it asks. Connectors are not on every ChatGPT plan.</p>
+          </div>
+          <div>
+            <h4>Claude Code</h4>
+            <p>Run <code>claude mcp add --transport http kai-vibe https://yoursite.com/wp-json/kai-vibe/v1/mcp</code>, then <code>/mcp</code> and choose to authenticate.</p>
+          </div>
+          <div>
+            <h4>Cursor, VS Code, Windsurf, n8n</h4>
+            <p>Add the address to the app's MCP settings. The Connect screen shows the exact block to paste for each one.</p>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="kai-walk-step">
+      <div class="kai-walk-text">
+        <h3>Press Connect in WordPress</h3>
+        <p>Your assistant opens a WordPress page asking you to approve it. Log in as the account it should act as and press
+           <strong>Connect</strong>. It tells you in plain words what the connection can and cannot do before you agree.</p>
+      </div>
+      <figure class="kai-shot kai-shot-narrow">
+        <img src="{{ url_for('static', filename=img ~ 'kai-vibe-approve-connection.webp') }}" width="740" height="1230" loading="lazy"
+             alt="WordPress approval page asking the site owner to let Claude work on the site, with Connect and Not now buttons">
+        <figcaption>The approval page your assistant sends you to.</figcaption>
+      </figure>
+    </li>
+    <li class="kai-walk-step">
+      <div class="kai-walk-text">
+        <h3>Ask for what you need</h3>
+        <p>Talk to it the way you would talk to a colleague. You do not need to know any commands.</p>
+        <ul class="kai-quotes">
+          <li>"Draft a blog post about our new opening hours and match the style of my last three posts."</li>
+          <li>"The About page looks broken. Work out why and fix it."</li>
+          <li>"Find every page that still mentions our old phone number and update it."</li>
+          <li>"Put every product in the Seeds category on a 10% sale and list the ones that are out of stock."</li>
+          <li>"Add alt text to every image that is missing it."</li>
+          <li>"Give me a health check of this site and tell me what to worry about."</li>
+        </ul>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section class="kai-section" id="features">
+  <h2>What the assistant can do on your WordPress site</h2>
+  <div class="kai-grid">
+    <div class="kai-card">
+      <h3>Posts and pages</h3>
+      <p>Find, create, edit, duplicate and schedule posts, pages and custom post types. New posts are saved as drafts unless you ask for them to be published. Custom fields, revisions and restore are included.</p>
+    </div>
+    <div class="kai-card">
+      <h3>Page builders</h3>
+      <p>Elementor, Divi, Beaver Builder, Bricks, Breakdance, Oxygen and WPBakery layouts are read and written in their own format, then the builder cache is cleared, so designs do not break.</p>
+    </div>
+    <div class="kai-card">
+      <h3>WooCommerce</h3>
+      <p>Search products, change prices, sale prices and stock, look up orders, update order status and pull sales reports. Everything goes through WooCommerce's own functions, so totals stay correct.</p>
+    </div>
+    <div class="kai-card">
+      <h3>Media</h3>
+      <p>Upload images from a link, set featured images, search the library, find images with no alt text and fill it in.</p>
+    </div>
+    <div class="kai-card">
+      <h3>Site structure</h3>
+      <p>Menus, categories, tags and custom taxonomies, comments and replies, and user accounts and roles.</p>
+    </div>
+    <div class="kai-card">
+      <h3>Search and replace</h3>
+      <p>Search across all content, preview a replacement as a dry run, then apply it once you approve.</p>
+    </div>
+    <div class="kai-card">
+      <h3>Fixing and housekeeping</h3>
+      <p>Site health checks, the error log, how a page actually renders, caches, permalinks, scheduled tasks, and plugins or themes that need updating.</p>
+    </div>
+    <div class="kai-card">
+      <h3>For developers</h3>
+      <p>Theme and plugin files, database queries and WP-CLI. WP-CLI and database writes are switched off by default in Settings, and file edits always wait for your approval.</p>
+    </div>
+  </div>
+
+  <details class="kai-tools">
+    <summary>See all 89 tools in version {{ plugin.version if plugin and plugin.version else '0.2.0' }}</summary>
+    <div class="kai-tools-grid">
+      {% for group, names in [
+        ('Content (10)', 'find_content, get_post, create_post, update_post, delete_post, duplicate_post, get_post_meta, set_post_meta, list_revisions, restore_revision'),
+        ('Page builders (4)', 'builder_detect, builder_get, builder_set, builder_flush'),
+        ('Search (4)', 'search_content, grep_content, replace_in_content, fetch_rendered_page'),
+        ('Media (5)', 'search_media, upload_media, update_media, set_featured_image, delete_media'),
+        ('Menus (4)', 'list_menus, get_menu, add_menu_item, delete_menu_item'),
+        ('Taxonomies (5)', 'list_terms, create_term, update_term, assign_terms, delete_term'),
+        ('Comments (4)', 'list_comments, moderate_comment, reply_to_comment, delete_comment'),
+        ('Users (6)', 'list_users, get_user, list_roles, create_user, update_user, delete_user'),
+        ('WooCommerce (7)', 'wc_products, wc_get_product, wc_update_product, wc_orders, wc_get_order, wc_update_order_status, wc_sales_report'),
+        ('Plugins and themes (8)', 'list_plugins, list_themes, install_plugin, activate_plugin, deactivate_plugin, update_extension, delete_plugin, switch_theme'),
+        ('Options (4)', 'get_option, list_options, set_option, delete_option'),
+        ('Files (7)', 'list_files, read_file, search_files, write_file, edit_file, create_directory, delete_file'),
+        ('Maintenance (6)', 'flush_cache, flush_rewrites, list_cron, run_cron_event, manage_transients, read_debug_log'),
+        ('Site (7)', 'site_info, site_health, list_post_types, list_taxonomies, connection_status, check_approval, list_approvals'),
+        ('Undo (3)', 'list_changes, get_change, undo_change'),
+        ('Database (3)', 'db_tables, db_describe, db_query'),
+        ('WP-CLI (2)', 'run_wp_cli, wp_cli_status')
+      ] %}
+      <div><h4>{{ group }}</h4><p>{{ names }}</p></div>
+      {% endfor %}
+    </div>
+    <p class="kai-small">It also offers four ready-made prompts (Review this site, Draft a post, Fix a broken page, Content cleanup) and read-only resources such as a site overview and the tool catalogue. WooCommerce tools only appear when WooCommerce is active.</p>
+  </details>
+</section>
+
+<section class="kai-section" id="safety">
+  <h2>Is connecting AI to WordPress safe?</h2>
+  <div class="kai-prose">
+    <p>It is as safe as the limits you set, and KAI MCP is built around those limits. The assistant can never do more than
+       the WordPress account that approved it, risky actions stop and wait for you, and anything it changes can be put back.</p>
+  </div>
+
+  <div class="kai-split">
+    <div class="kai-split-text">
+      <h3>Risky actions wait for your approval</h3>
+      <p>Permanently deleting posts, media, users or comments, installing, activating or removing plugins, switching
+         themes, editing files, changing site settings, changing an order's status and search-and-replace across the site
+         all stop in an approval queue. Approving one lets the assistant do that exact
+         action once. Anything else needs a fresh approval.</p>
+    </div>
+    <figure class="kai-shot">
+      <img src="{{ url_for('static', filename=img ~ 'kai-vibe-approval-queue.webp') }}" width="1600" height="750" loading="lazy"
+           alt="KAI Vibe Approvals screen with a search-and-replace and a post deletion waiting for the owner to approve or decline">
+      <figcaption>Approvals: nothing destructive runs until you press Approve.</figcaption>
+    </figure>
+  </div>
+
+  <div class="kai-split kai-split-flip">
+    <div class="kai-split-text">
+      <h3>One-click undo for every change</h3>
+      <p>Every change is stored with a copy of what was there before, including things WordPress revisions do not cover:
+         custom fields, settings, categories and theme files. Press Undo on the Changes screen to put it back.</p>
+    </div>
+    <figure class="kai-shot">
+      <img src="{{ url_for('static', filename=img ~ 'kai-vibe-undo-changes.webp') }}" width="1600" height="733" loading="lazy"
+           alt="KAI Vibe Changes screen listing edits made by Claude, each with an Undo button">
+      <figcaption>Changes: see what the assistant edited and undo any single change.</figcaption>
+    </figure>
+  </div>
+
+  <div class="kai-split">
+    <div class="kai-split-text">
+      <h3>You choose exactly what each key can do</h3>
+      <p>Give each person or app its own key, pick the WordPress account it acts as, set an expiry date, and tick only the
+         jobs it needs. Presets for <em>Read only</em>, <em>Content editor</em> and <em>Developer</em> make this quick.
+         Point it at an Editor account and it cannot install a plugin, whatever it is asked.</p>
+    </div>
+    <figure class="kai-shot">
+      <img src="{{ url_for('static', filename=img ~ 'kai-vibe-create-key-permissions.webp') }}" width="1600" height="1083" loading="lazy"
+           alt="Creating a KAI Vibe key: label, WordPress user to act as, expiry, and permission scopes rated low, medium, high or critical">
+      <figcaption>Tokens: each permission is labelled low, medium, high or critical risk.</figcaption>
+    </figure>
+  </div>
+
+  <div class="kai-split kai-split-flip">
+    <div class="kai-split-text">
+      <h3>A full record of everything it did</h3>
+      <p>The Activity screen logs every action with the time, the key, the WordPress user and the result. Values that look
+         like passwords or API keys are removed before they are written.</p>
+    </div>
+    <figure class="kai-shot">
+      <img src="{{ url_for('static', filename=img ~ 'kai-vibe-activity-log.webp') }}" width="1600" height="917" loading="lazy"
+           alt="KAI Vibe Activity log showing each tool the assistant used, the user it acted as and the result">
+      <figcaption>Activity: every tool call, sign-in and approval, searchable.</figcaption>
+    </figure>
+  </div>
+
+  <div class="kai-grid kai-grid-3">
+    <div class="kai-card kai-card-plain">
+      <h3>Nothing goes through us</h3>
+      <p>No middleman, no analytics, nothing phoned home. Your content only goes to the assistant you connect, and only when you ask it something.</p>
+    </div>
+    <div class="kai-card kai-card-plain">
+      <h3>Secrets stay hidden</h3>
+      <p>Passwords are never readable, settings that look like keys are hidden, and your site address, admin email and registration settings cannot be changed this way.</p>
+    </div>
+    <div class="kai-card kai-card-plain">
+      <h3>Off switch</h3>
+      <p>Disconnect any assistant from the Tokens screen, or switch all connections off with one tick box. Deleting the plugin removes every key and all of its data.</p>
+    </div>
+  </div>
+</section>
+
+<section class="kai-section">
+  <h2>Works with the AI tools you already use</h2>
+  <div class="kai-prose">
+    <p>Any app that supports MCP can connect, including <strong>Claude</strong>, <strong>ChatGPT</strong>,
+       <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>VS Code</strong>, <strong>Windsurf</strong> and
+       automation tools such as <strong>n8n</strong>. Apps sign themselves in with OAuth, so there is nothing
+       product-specific to set up and you can switch assistants without touching the site. For the few tools that can only
+       read a fixed key from a settings file, you can create a key by hand.</p>
+  </div>
+</section>
+
+<section class="kai-section">
+  <h2>KAI MCP or the WordPress MCP Adapter?</h2>
+  <div class="kai-prose">
+    <p>The WordPress MCP Adapter is a developer building block: it exposes "abilities" that plugins register through the
+       WordPress Abilities API, and a developer decides what to expose and how clients connect. It is a good fit if you are
+       building your own integration.</p>
+    <p>KAI MCP is a finished plugin for site owners. It ships with 89 ready tools, including page builder and WooCommerce
+       support, and adds what a live site needs around them: a two-button OAuth connection, an approval queue, one-click
+       undo and an activity log.</p>
+  </div>
+</section>
+
+<section class="kai-download result-card" id="download">
+  <div>
+    <h2>Download KAI MCP for WordPress</h2>
+    {% if plugin %}
+    <p class="kai-meta">
+      {{ plugin.name or 'KAI Vibe' }}{% if plugin.version %} · version {{ plugin.version }}{% endif %}
+      {% if plugin.requires_wp %} · WordPress {{ plugin.requires_wp }}+{% endif %}
+      {% if plugin.requires_php %} · PHP {{ plugin.requires_php }}+{% endif %}
+      · {{ plugin.size_kb }} KB zip
+    </p>
+    {% endif %}
+    <p>Free download. {% if not user %}Create a free Kai SEO Suite account first so we can tell you about updates and security fixes.{% endif %}</p>
+  </div>
+  <div class="kai-cta">
+    {% if not plugin %}
+    <span class="badge badge-warn">Download available soon</span>
+    {% elif user %}
+    <a class="btn btn-lg" href="{{ download_url }}">Download the zip</a>
+    {% else %}
+    <a class="btn btn-lg" href="{{ signup_url }}">Create free account</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login', next=download_url) }}">Sign in</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="seo-content">
+  <h2>Frequently asked questions</h2>
+  {% for f in faqs %}
+  <div class="faq-item">
+    <h3>{{ f.q }}</h3>
+    <p>{{ f.a | safe }}</p>
+  </div>
+  {% endfor %}
+
+  <h2>Related tools</h2>
+  <ul class="related-tools">
+    <li><a href="{{ url_for('geo.geo_readiness') }}">GEO Readiness Scorer<span>Check how ready a page is for AI answer engines.</span></a></li>
+    <li><a href="{{ url_for('audit.ai_crawler_access') }}">AI Crawler Access Checker<span>See which AI crawlers your robots.txt lets in.</span></a></li>
+    <li><a href="{{ url_for('geo.llms_txt_generator') }}">llms.txt Generator<span>Summarise your site for AI assistants.</span></a></li>
+    <li><a href="{{ url_for('content.grader') }}">Content Grader<span>Grade the posts your assistant drafts before you publish.</span></a></li>
+  </ul>
+</section>
+{% endblock %}

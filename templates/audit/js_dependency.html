@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}JS-Dependency Detector{% endblock %}
+{% block meta_description %}Heuristically flag pages whose content likely depends on client-side JavaScript rendering.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>⚙️ JS-Dependency Detector</h1>
+  <p>Fetches the raw (non-rendered) HTML and heuristically flags pages likely to rely on client-side JavaScript for their main content. A risk for crawlers that don't execute JS.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Analyze</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>
+    {% if result.likely_js_dependent %}<span class="badge badge-warn">Likely JS-dependent</span>{% else %}<span class="badge badge-ok">Content visible without JS</span>{% endif %}
+  </h2>
+  <table class="result-table">
+    <tbody>
+      <tr><td>Raw HTML size</td><td>{{ result.total_html_bytes }} bytes</td></tr>
+      <tr><td>&lt;script&gt; tags</td><td>{{ result.script_tags }}</td></tr>
+      <tr><td>Visible word count (no JS)</td><td>{{ result.visible_word_count }}</td></tr>
+      <tr><td>Empty SPA root containers found</td><td>{{ result.empty_spa_roots_found }}</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">Heuristic only. A low visible-word-count on a large HTML page, or an empty #root/#app/#__next container, suggests the real content is injected by JavaScript after load.</p>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

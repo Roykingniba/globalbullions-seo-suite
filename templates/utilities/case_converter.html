@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Case Converter{% endblock %}
+{% block meta_description %}Switch text between sentence case, title case, camelCase, snake_case, kebab-case and more.{% endblock %}
+{% block content %}
+{{ m.head("🔠", "Case Converter", "Switch text between eleven common casing styles, from plain sentence case to the naming styles used in code.") }}
+
+<form class="tool-form" method="post">
+  <label for="mode">Convert to</label>
+  <select id="mode" name="mode">
+    <option value="sentence" {% if mode=='sentence' %}selected{% endif %}>Sentence case</option>
+    <option value="title" {% if mode=='title' %}selected{% endif %}>Title Case</option>
+    <option value="lower" {% if mode=='lower' %}selected{% endif %}>lower case</option>
+    <option value="upper" {% if mode=='upper' %}selected{% endif %}>UPPER CASE</option>
+    <option value="camel" {% if mode=='camel' %}selected{% endif %}>camelCase</option>
+    <option value="pascal" {% if mode=='pascal' %}selected{% endif %}>PascalCase</option>
+    <option value="snake" {% if mode=='snake' %}selected{% endif %}>snake_case</option>
+    <option value="kebab" {% if mode=='kebab' %}selected{% endif %}>kebab-case</option>
+    <option value="constant" {% if mode=='constant' %}selected{% endif %}>CONSTANT_CASE</option>
+    <option value="alternating" {% if mode=='alternating' %}selected{% endif %}>aLtErNaTiNg</option>
+    <option value="invert" {% if mode=='invert' %}selected{% endif %}>Invert current case</option>
+  </select>
+
+  <label for="text">Your text</label>
+  <textarea id="text" name="text" style="min-height:180px;" placeholder="Paste your text here...">{{ text }}</textarea>
+  <button class="btn" type="submit">Convert</button>
+</form>
+
+{% if result %}{{ m.output(result, "Converted text", "case-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>What each style is for</h2>
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Style</th><th>Looks like</th><th>Use it for</th></tr></thead>
+      <tbody>
+        <tr><td>Sentence case</td><td><code>The quick brown fox</code></td><td>Body copy, meta descriptions, most headings on the web</td></tr>
+        <tr><td>Title Case</td><td><code>The Quick Brown Fox</code></td><td>Page titles and headlines. Short joining words stay lowercase</td></tr>
+        <tr><td>camelCase</td><td><code>quickBrownFox</code></td><td>Variables in JavaScript, Java and similar languages</td></tr>
+        <tr><td>PascalCase</td><td><code>QuickBrownFox</code></td><td>Class and component names</td></tr>
+        <tr><td>snake_case</td><td><code>quick_brown_fox</code></td><td>Python variables, database columns</td></tr>
+        <tr><td>kebab-case</td><td><code>quick-brown-fox</code></td><td>URLs, CSS class names, file names</td></tr>
+        <tr><td>CONSTANT_CASE</td><td><code>QUICK_BROWN_FOX</code></td><td>Environment variables and fixed values</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:12px;">Title case here keeps small joining words such as "of", "and" and "the" in lowercase
+     unless they are the first or last word, which is the style most publications follow.</p>
+</div>
+
+{{ m.where([
+  'Renaming a batch of files or URLs? Copy the current names into the box, pick kebab-case, and paste the result back.',
+  'Cleaning up a headline someone typed in all caps? Paste it in and choose Title Case or Sentence case.',
+  'Moving data between systems? If one uses snake_case column names and the other expects camelCase, paste the list of field names and convert them in one go.',
+  'Each line is treated as part of the same text, so you can paste a whole list and convert everything at once.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

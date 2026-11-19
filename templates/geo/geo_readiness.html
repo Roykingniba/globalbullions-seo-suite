@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}GEO Readiness Scorer{% endblock %}
+{% block meta_description %}Score a page's readiness for AI answer engines: AI crawler access, structured data, and answer-first content structure.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🎯 GEO Readiness Scorer</h1>
+  <p>Combines AI-crawler access, structured data completeness, and an "answer-first" content heuristic into a single 0–100 readiness score for AI answer engines (ChatGPT, Perplexity, AI Overviews).</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Score this page</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <div class="score-ring-wrap">
+    <div style="font-family:monospace; font-size:48px; font-weight:800; color: var(--accent);">{{ result.score }}<span style="font-size:20px; color:var(--text-dim);">/100</span></div>
+    <div class="progress-bar" style="flex:1; min-width:160px;"><div class="progress-bar-fill" style="width:{{ result.score }}%;"></div></div>
+  </div>
+</div>
+
+<div class="result-card">
+  <h3>Breakdown</h3>
+  <table class="result-table">
+    <tbody>
+      <tr>
+        <td>AI crawler access</td>
+        <td>{{ result.ai_access_pct }}% of AI crawlers allowed</td>
+        <td>{% if result.ai_access_pct >= 80 %}<span class="badge badge-ok">Good</span>{% else %}<span class="badge badge-warn">Restricted</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Structured data</td>
+        <td>{{ result.schema_count }} JSON-LD block(s){% if result.has_schema and result.schema_complete %}, all required fields present{% endif %}</td>
+        <td>{% if result.has_schema %}<span class="badge badge-ok">Present</span>{% else %}<span class="badge badge-warn">Missing</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Answer-first structure</td>
+        <td>Does the opening content directly address the H1?</td>
+        <td>{% if result.answer_first %}<span class="badge badge-ok">Yes</span>{% else %}<span class="badge badge-warn">Not clearly</span>{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="hint">Full detail: {{ result.ai_access_detail.allowed_count }}/{{ result.ai_access_detail.total_count }} AI crawlers allowed via <a href="{{ url_for('audit.ai_crawler_access') }}">the AI Crawler Access Checker</a>.</p>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

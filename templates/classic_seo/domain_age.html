@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Domain Age Checker{% endblock %}
+{% block meta_description %}Look up a domain's registration and last-updated dates via RDAP.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>📅 Domain Age Checker</h1>
+  <p>Look up a domain's registration date, last-updated date, and nameservers via the free RDAP protocol (WHOIS's modern JSON replacement).</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="domain">Domain</label>
+  <input type="text" id="domain" name="domain" value="{{ domain_input }}" placeholder="example.com">
+  <button class="btn" type="submit">Look up</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>{{ result.domain }}</h2>
+  <table class="result-table">
+    <tbody>
+      <tr><td>Registered</td><td>{{ result.registered or '-' }}</td></tr>
+      <tr><td>Last changed</td><td>{{ result.last_changed or '-' }}</td></tr>
+      <tr><td>Expires</td><td>{{ result.expires or '-' }}</td></tr>
+      <tr><td>Status</td><td>{{ result.status | join(', ') if result.status else '-' }}</td></tr>
+      <tr><td>Nameservers</td><td>{{ result.nameservers | join(', ') if result.nameservers else '-' }}</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}URL Encoder and Decoder{% endblock %}
+{% block meta_description %}Percent-encode text for safe use in URLs, or decode an encoded URL back to readable text.{% endblock %}
+{% block content %}
+{{ m.head("🌐", "URL Encoder and Decoder", "Make text safe to put in a URL, or turn an encoded URL back into something you can read.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="action">Direction</label>
+  <select id="action" name="action">
+    <option value="encode" {% if action=='encode' %}selected{% endif %}>Text to encoded URL</option>
+    <option value="decode" {% if action=='decode' %}selected{% endif %}>Encoded URL to text</option>
+  </select>
+
+  <label for="text">Input</label>
+  <textarea id="text" name="text" style="min-height:150px; font-family:ui-monospace, monospace;" placeholder="Paste your text or URL here...">{{ text }}</textarea>
+
+  {{ m.check("component", "Encode every reserved character (use for a single value, not a whole URL)", component) }}
+  <p class="hint">Leave this ticked when you are encoding one piece of a URL, such as a search term. Untick it when you
+     are encoding a complete URL and want to keep the <code>:</code> and <code>/</code> characters readable.</p>
+  <button class="btn" type="submit">Convert</button>
+</form>
+
+{% if result %}{{ m.output(result, "Result", "url-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>Why URLs need encoding</h2>
+  <p>URLs can only contain a limited set of characters. Anything else, including spaces, accented letters and most
+     punctuation, has to be written as a percent sign followed by a code. A space becomes <code>%20</code>, and an
+     ampersand becomes <code>%26</code>.</p>
+  <p>The ampersand matters most. Inside a URL, <code>&amp;</code> separates one parameter from the next. If a value you
+     are inserting contains an ampersand and you do not encode it, the URL breaks in a way that is easy to miss:
+     everything after it gets read as a separate parameter.</p>
+</div>
+
+{{ m.where([
+  'Building a link with a search term in it? Type the term into your site search, copy the resulting URL from the address bar, and decode it here to see what the browser actually sent.',
+  'Reading a messy analytics report? Paste the encoded URL and decode it to see the plain-text campaign names and search queries.',
+  'Adding a value to a query string yourself? Encode just that value with the reserved-character box ticked, then paste it into your URL.',
+  'Sharing a link that contains a name or a phrase with spaces? Encode it first so the link does not break when someone pastes it into a chat or an email.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

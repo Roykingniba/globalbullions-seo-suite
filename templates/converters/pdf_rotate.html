@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}PDF Rotate Tool{% endblock %}
+{% block meta_description %}Rotate every page of a PDF by 90, 180, or 270 degrees.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔄 PDF Rotate</h1>
+  <p>Rotate every page of a PDF by a fixed angle. Handy for scans saved sideways or upside down.</p>
+</div>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+<form class="tool-form" method="post" enctype="multipart/form-data">
+  <label for="pdf">PDF file</label>
+  <input type="file" id="pdf" name="pdf" accept="application/pdf" style="margin-bottom:14px;">
+
+  <label for="degrees">Rotate by</label>
+  <select id="degrees" name="degrees" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); margin-bottom:14px;">
+    <option value="90" {% if degrees == '90' %}selected{% endif %}>90°</option>
+    <option value="180" {% if degrees == '180' %}selected{% endif %}>180°</option>
+    <option value="270" {% if degrees == '270' %}selected{% endif %}>270°</option>
+  </select>
+
+  <button class="btn" type="submit">Rotate &amp; download</button>
+</form>
+{% include "_tool_seo.html" %}
+{% endblock %}

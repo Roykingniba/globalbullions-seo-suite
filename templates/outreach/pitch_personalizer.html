@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Guest Post Pitch Personalizer{% endblock %}
+{% block meta_description %}Bulk-personalize outreach pitch templates using each target site's own name, pulled live from its homepage.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>✉️ Guest Post Pitch Personalizer</h1>
+  <p>Write one pitch template with <code>{{ '{{site_name}}' }}</code> and <code>{{ '{{domain}}' }}</code> placeholders, and this fills them in for every domain on your list using each site's own homepage title. A fast first pass before you add the truly personal touches.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="domains">Domains (one per line. No limit)</label>
+  <textarea id="domains" name="domains" placeholder="backlinko.com&#10;smashingmagazine.com">{{ domains_input }}</textarea>
+
+  <label for="template">Pitch template</label>
+  <textarea id="template" name="template" style="min-height:180px;">{{ template_input }}</textarea>
+
+  <button class="btn" type="submit">Generate personalized pitches</button>
+</form>
+
+{% if results %}
+{% for r in results %}
+<div class="result-card">
+  <h3>{{ r.domain }} <span class="hint">({{ r.site_name }})</span></h3>
+  {% if r.error %}<p><span class="badge badge-warn">Couldn't fetch site name. Used domain as fallback</span> {{ r.error }}</p>{% endif %}
+  <pre style="white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px;">{{ r.pitch }}</pre>
+</div>
+{% endfor %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

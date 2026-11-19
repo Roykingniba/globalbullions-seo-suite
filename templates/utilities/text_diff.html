@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Text Compare and Diff Checker{% endblock %}
+{% block meta_description %}Compare two blocks of text side by side and see exactly which lines were added, removed or changed.{% endblock %}
+{% block content %}
+{{ m.head("🔍", "Text Compare", "Put two versions side by side and see exactly which lines were added, removed or changed.") }}
+
+<form class="tool-form" method="post">
+  <div class="opt-row">
+    <div>
+      <label for="left">Original</label>
+      <textarea id="left" name="left" style="min-height:230px; font-family:ui-monospace, monospace;" placeholder="Paste the first version here...">{{ left }}</textarea>
+    </div>
+    <div>
+      <label for="right">Changed</label>
+      <textarea id="right" name="right" style="min-height:230px; font-family:ui-monospace, monospace;" placeholder="Paste the second version here...">{{ right }}</textarea>
+    </div>
+  </div>
+
+  {{ m.check("ignore_case", "Ignore capitalisation", ignore_case) }}
+  {{ m.check("ignore_whitespace", "Ignore differences in spacing", ignore_whitespace) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Compare</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Summary</h2>
+  {% if result.identical %}
+    <p class="flash flash-info" style="margin:0;">The two versions are identical.</p>
+  {% else %}
+  <div class="stat-grid">
+    <div class="stat"><b>{{ result.added }}</b><span>Added</span></div>
+    <div class="stat"><b>{{ result.removed }}</b><span>Removed</span></div>
+    <div class="stat"><b>{{ result.changed }}</b><span>Changed</span></div>
+    <div class="stat"><b>{{ result.similarity }}%</b><span>Similar</span></div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h2>Line by line</h2>
+  <div class="table-scroll">
+    <table class="result-table diff-table">
+      <thead><tr><th style="width:44px;">#</th><th>Original</th><th style="width:44px;">#</th><th>Changed</th></tr></thead>
+      <tbody>
+        {% for row in result.rows %}
+        <tr class="diff-{{ row.kind }}">
+          <td class="diff-no">{{ row.left_no or '' }}</td>
+          <td>{{ row.left }}</td>
+          <td class="diff-no">{{ row.right_no or '' }}</td>
+          <td>{{ row.right }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:12px;">
+    <span class="diff-key diff-added">Green</span> is new,
+    <span class="diff-key diff-removed">red</span> was taken out, and
+    <span class="diff-key diff-changed">amber</span> means the line was edited.
+  </p>
+</div>
+{% endif %}
+
+{{ m.where([
+  'Comparing two drafts? Copy each version out of Google Docs or Word into the two boxes. Paste as plain text so formatting does not confuse the comparison.',
+  'Checking what changed on a live page? Open the page, select the article text and copy it into the right-hand box, then paste your original draft on the left.',
+  'Comparing robots.txt or a config file? Open the file in a plain text editor and copy the whole thing into each box.',
+  'Comparing two keyword or URL lists? Paste one list per side. Sorting both lists first, using the Line Tools page, makes the result much easier to read.',
+  'Turn on "ignore differences in spacing" when one version came from a system that re-wraps lines, otherwise every line will look changed.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

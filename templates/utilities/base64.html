@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Base64 Encoder and Decoder{% endblock %}
+{% block meta_description %}Encode text to Base64 or decode Base64 back to plain text, with URL-safe support.{% endblock %}
+{% block content %}
+{{ m.head("🔐", "Base64 Encoder and Decoder", "Convert text to Base64 or turn Base64 back into readable text.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="action">Direction</label>
+  <select id="action" name="action">
+    <option value="encode" {% if action=='encode' %}selected{% endif %}>Text to Base64</option>
+    <option value="decode" {% if action=='decode' %}selected{% endif %}>Base64 to text</option>
+  </select>
+
+  <label for="text">Input</label>
+  <textarea id="text" name="text" style="min-height:170px; font-family:ui-monospace, monospace;" placeholder="Paste your text or Base64 here...">{{ text }}</textarea>
+
+  {{ m.check("url_safe", "URL-safe variant (uses - and _ instead of + and /)", url_safe) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Convert</button>
+</form>
+
+{% if result %}{{ m.output(result, "Result", "b64-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>What Base64 is, and what it is not</h2>
+  <p>Base64 rewrites data using only 64 safe characters, so it can travel through systems that expect plain text.
+     It is how images get embedded directly in HTML and CSS, and how binary attachments move through email.</p>
+  <p><strong>Base64 is not encryption.</strong> Anyone can decode it in seconds, including with this page. It hides
+     nothing. Never use it to store passwords, API keys or anything else that needs to stay private.</p>
+  <p>Encoded output is about a third larger than the input, which is why embedding a large image as Base64 can make a
+     page slower rather than faster.</p>
+</div>
+
+{{ m.where([
+  'Decoding a token or a config value? Copy the string from wherever you found it, such as an environment variable, an API response or a config file, and paste it in with the direction set to decode.',
+  'Pulled a value from a URL? URLs use the URL-safe variant, so tick that box or the decode will fail on - and _ characters.',
+  'Missing the trailing = signs? Many systems strip them. This tool adds the padding back automatically, so paste what you have.',
+  'Embedding a small icon in CSS? Encode the file contents, then use it as data:image/png;base64,YOUR_STRING. Worth it for tiny images only.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

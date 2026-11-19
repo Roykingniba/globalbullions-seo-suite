@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Robots.txt Generator{% endblock %}
+{% block meta_description %}Build a robots.txt file with custom disallow rules, a sitemap reference, and per-AI-crawler access control.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🤖 Robots.txt Generator</h1>
+  <p>Build a robots.txt file. Including explicit allow/block control over named AI crawlers like GPTBot and ClaudeBot, not just standard search engines.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="disallow">Paths to disallow (one per line, optional)</label>
+  <textarea id="disallow" name="disallow" placeholder="/admin/&#10;/cart/&#10;/*?sort=">{{ form.disallow }}</textarea>
+
+  <label for="sitemap_url">Sitemap URL (optional)</label>
+  <input type="text" id="sitemap_url" name="sitemap_url" value="{{ form.sitemap_url }}" placeholder="https://example.com/sitemap.xml">
+
+  <label for="crawl_delay">Crawl-delay in seconds (optional)</label>
+  <input type="text" id="crawl_delay" name="crawl_delay" value="{{ form.crawl_delay }}" placeholder="e.g. 10">
+
+  <label>Block specific AI crawlers (optional. Unchecked means allowed)</label>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:6px; margin-bottom:14px;">
+    {% for agent, description in ai_agents %}
+    <label style="font-weight:400; font-size:13px; display:flex; gap:6px; align-items:center;">
+      <input type="checkbox" name="blocked_agents" value="{{ agent }}" {% if agent in form.blocked_agents %}checked{% endif %}>
+      {{ agent }}
+    </label>
+    {% endfor %}
+  </div>
+
+  <button class="btn" type="submit">Generate robots.txt</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Generated robots.txt</h2>
+  <pre style="white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px;">{{ result }}</pre>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

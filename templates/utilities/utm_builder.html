@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}UTM Campaign Link Builder{% endblock %}
+{% block meta_description %}Build tagged campaign URLs with utm_source, utm_medium and utm_campaign so your analytics reports stay clean.{% endblock %}
+{% block content %}
+{{ m.head("📊", "UTM Link Builder", "Add campaign tags to a URL so your analytics tool can tell you where visitors actually came from.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="base_url">Page URL</label>
+  <input type="text" id="base_url" name="base_url" value="{{ base_url }}" placeholder="https://example.com/landing-page">
+
+  <div class="opt-row">
+    <div>
+      <label for="utm_source">Source (required)</label>
+      <input type="text" id="utm_source" name="utm_source" value="{{ params.utm_source }}" placeholder="newsletter">
+      <p class="hint">Where the traffic comes from: google, newsletter, linkedin.</p>
+    </div>
+    <div>
+      <label for="utm_medium">Medium (required)</label>
+      <input type="text" id="utm_medium" name="utm_medium" value="{{ params.utm_medium }}" placeholder="email">
+      <p class="hint">The type of channel: email, cpc, social, referral.</p>
+    </div>
+  </div>
+
+  <div class="opt-row">
+    <div>
+      <label for="utm_campaign">Campaign</label>
+      <input type="text" id="utm_campaign" name="utm_campaign" value="{{ params.utm_campaign }}" placeholder="spring-sale">
+    </div>
+    <div>
+      <label for="utm_term">Term</label>
+      <input type="text" id="utm_term" name="utm_term" value="{{ params.utm_term }}" placeholder="running shoes">
+    </div>
+  </div>
+
+  <div class="opt-row">
+    <div>
+      <label for="utm_content">Content</label>
+      <input type="text" id="utm_content" name="utm_content" value="{{ params.utm_content }}" placeholder="header-button">
+    </div>
+    <div>
+      <label for="utm_id">Campaign ID</label>
+      <input type="text" id="utm_id" name="utm_id" value="{{ params.utm_id }}" placeholder="spring24">
+    </div>
+  </div>
+
+  {{ m.check("lowercase", "Force everything to lowercase (strongly recommended)", lowercase) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Build link</button>
+</form>
+
+{% if result %}{{ m.output(result, "Your tagged link", "utm-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>Why consistency matters more than the tags themselves</h2>
+  <p>Analytics tools treat tag values as literal text. <code>Facebook</code>, <code>facebook</code> and
+     <code>FaceBook</code> become three separate rows in your report, splitting one campaign across three lines and
+     making the numbers look smaller than they are. That is why the lowercase option is on by default.</p>
+  <p>Spaces cause the same problem, so any space you type is turned into a hyphen.</p>
+  <p>Agree on a naming convention before you start tagging, write it down, and stick to it. Most messy analytics data
+     comes from three people inventing three different spellings of the same campaign.</p>
+  <p>One thing to avoid: never put UTM tags on internal links between pages of your own site. Doing so restarts the
+     visitor's session and overwrites the original source, so you lose the record of how they actually found you.</p>
+</div>
+
+{{ m.where([
+  'The page URL is whatever you want people to land on. Open the page and copy it from your browser address bar.',
+  'Source is the specific place the link is going: the name of the newsletter, the social platform, or the partner site.',
+  'Medium is the broad channel type. Keep to a short fixed list such as email, social, cpc, affiliate and referral, and use the same words every time.',
+  'Campaign ties everything for one push together, so use the same value across every link in that campaign.',
+  'Content is for telling two links apart on the same page, such as header-button versus footer-link.',
+  'Once the link is live, check the results in Google Analytics under Reports, then Acquisition, then Traffic acquisition. Your tags show up as Session source and Session medium.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

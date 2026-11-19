@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Robots.txt & Sitemap Validator{% endblock %}
+{% block meta_description %}Fetch robots.txt and XML sitemaps, then cross-check sitemap URLs against disallow rules to flag blocked or orphaned pages.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🧭 Robots.txt &amp; Sitemap Validator</h1>
+  <p>Checks your sitemap URLs against robots.txt disallow rules. A page listed in the sitemap but blocked in robots.txt confuses search engines.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Site URL (homepage)</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com">
+  <button class="btn" type="submit">Run check</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Robots.txt</h2>
+  <p>{{ result.robots_url }}. {% if result.robots_found %}<span class="badge badge-ok">Found</span>{% else %}<span class="badge badge-warn">Not found (everything allowed by default)</span>{% endif %}</p>
+</div>
+
+<div class="result-card">
+  <h2>Sitemaps checked</h2>
+  <ul>{% for sm in result.sitemap_candidates %}<li>{{ sm }}</li>{% endfor %}</ul>
+  {% if result.sitemap_fetch_errors %}
+  <p><span class="badge badge-warn">Fetch errors</span></p>
+  <ul>{% for e in result.sitemap_fetch_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+  <p>{{ result.total_urls_checked }} URL(s) checked.</p>
+</div>
+
+<div class="result-card">
+  <h2>Blocked-but-listed URLs ({{ result.blocked_urls|length }})</h2>
+  {% if result.blocked_urls %}
+  <p><span class="badge badge-error">Issue found</span> These URLs are in the sitemap but blocked by robots.txt:</p>
+  <ul>{% for u in result.blocked_urls %}<li>{{ u }}</li>{% endfor %}</ul>
+  {% else %}
+  <p><span class="badge badge-ok">No conflicts found</span></p>
+  {% endif %}
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

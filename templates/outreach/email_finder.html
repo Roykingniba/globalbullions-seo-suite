@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Email & Contact Finder. Guest Post Outreach Scraper{% endblock %}
+{% block meta_description %}Paste a list of websites and find their contact and write-for-us pages, then pull out the email addresses. Free, no account needed.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>📬 Email &amp; Contact Finder</h1>
+  <p>Paste a list of domains. Each site's homepage, contact and guest-post pages are scanned for email addresses, with live progress as it goes.</p>
+</div>
+
+<form class="tool-form" method="post" id="ef-form" novalidate>
+  <div class="field-head">
+    <label for="domains">Domains, one per line</label>
+    <span class="field-meta" id="ef-count" aria-live="polite"></span>
+  </div>
+  <textarea id="domains" name="domains" rows="8" spellcheck="false"
+            placeholder="backlinko.com&#10;smashingmagazine.com&#10;https://neilpatel.com/blog/">{{ (domains | join('\n')) if domains else '' }}</textarea>
+  <p class="hint">Full URLs are fine. Paths, duplicates and blank lines are cleaned up for you. No limit on list length.</p>
+
+  <details class="field-details">
+    <summary>Contact page keywords <span class="field-meta" id="ef-kw-count"></span></summary>
+    <p class="hint">A link is followed when its text or URL contains one of these words. Earlier words are tried first, up to 8 pages per site.</p>
+    <textarea id="keywords" name="keywords" rows="8" spellcheck="false"
+              data-default="{{ default_keywords | join('\n') }}">{{ keywords_text }}</textarea>
+    <button type="button" class="btn-link" id="ef-kw-reset">Reset to default keywords</button>
+  </details>
+
+  <div class="form-actions">
+    <button class="btn" type="submit" id="ef-start">Start scanning</button>
+    <button class="btn btn-secondary" type="button" id="ef-stop" hidden>Stop</button>
+  </div>
+</form>
+
+<section class="result-card ef-progress" id="ef-progress" hidden aria-live="polite">
+  <div class="ef-progress-head">
+    <h2 id="ef-status">Scanning</h2>
+    <span class="ef-percent" id="ef-percent">0%</span>
+  </div>
+  <div class="progress-bar progress-bar-lg" role="progressbar" aria-labelledby="ef-status"
+       aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ef-bar">
+    <div class="progress-bar-fill" id="ef-fill"></div>
+  </div>
+  <p class="ef-current" id="ef-current"></p>
+  <div class="stat-grid">
+    <div class="stat"><b id="ef-s-done">0 / 0</b><span>Domains scanned</span></div>
+    <div class="stat"><b id="ef-s-emails">0</b><span>Unique emails</span></div>
+    <div class="stat"><b id="ef-s-hits">0</b><span>Sites with emails</span></div>
+    <div class="stat"><b id="ef-s-failed">0</b><span>Failed</span></div>
+    <div class="stat"><b id="ef-s-eta">-</b><span>Time left</span></div>
+  </div>
+</section>
+
+<section class="result-card" id="ef-results" hidden>
+  <div class="out-head">
+    <h2>Results</h2>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" type="button" id="ef-copy">Copy emails</button>
+      <button class="btn btn-secondary btn-sm" type="button" id="ef-csv">Download CSV</button>
+      <button class="btn btn-secondary btn-sm" type="button" id="ef-retry" hidden>Retry failed</button>
+    </div>
+  </div>
+  <div class="seg" role="tablist" aria-label="Filter results" id="ef-filter">
+    <button type="button" role="tab" aria-selected="true" data-f="all">All <span></span></button>
+    <button type="button" role="tab" aria-selected="false" data-f="hit">With emails <span></span></button>
+    <button type="button" role="tab" aria-selected="false" data-f="miss">No emails <span></span></button>
+    <button type="button" role="tab" aria-selected="false" data-f="fail">Failed <span></span></button>
+  </div>
+  <div class="table-scroll">
+    <table class="result-table ef-table">
+      <thead><tr><th class="num">#</th><th>Domain</th><th>Emails</th><th>Found on</th><th>Status</th></tr></thead>
+      <tbody id="ef-rows"></tbody>
+    </table>
+  </div>
+  <p class="empty-note" id="ef-empty" hidden>Nothing in this view yet.</p>
+</section>
+
+<noscript>
+{% if notice %}<div class="flash flash-info">{{ notice }}</div>{% endif %}
+{% if submitted %}
+<section class="result-card">
+  <h2>Results</h2>
+  <div class="table-scroll">
+  <table class="result-table">
+    <thead><tr><th>Domain</th><th>Emails</th><th>Found on</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for r in results %}
+      <tr>
+        <td>{{ r.domain }}</td>
+        <td>{{ r.emails | join(', ') if r.emails else 'None found' }}</td>
+        <td>{% for p in r.pages if p.emails %}{{ p.url }}<br>{% endfor %}</td>
+        <td>{{ 'Failed: ' ~ r.errors[0].error if r.status == 'error' else 'Done' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endif %}
+</noscript>
+
+{% include "_tool_seo.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script>window.EF_SCAN_URL = {{ url_for('outreach.email_finder_scan') | tojson }};</script>
+<script src="{{ url_for('static', filename='js/email_finder.js') }}"></script>
+{% endblock %}

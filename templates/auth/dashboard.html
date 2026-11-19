@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block meta_description %}Your connected sites, scheduled content and recent activity.{% endblock %}
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Signed in as <strong>{{ user.display_name or user.email }}</strong></p>
+  </div>
+  <div class="dash-actions">
+    {% if is_admin %}
+    <a class="btn" href="{{ url_for('kai_mcp.signups_export') }}">Download sign-ups (Excel)</a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('auth.account') }}">Account</a>
+    <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline;">
+      {# The host's security layer rejects a POST with a zero-length body with a
+         403, and a form with no fields sends exactly that. This field gives the
+         request a body so sign-out reaches the app at all. #}
+      <input type="hidden" name="action" value="signout">
+      <button class="btn btn-secondary" type="submit">Sign out</button>
+    </form>
+  </div>
+</div>
+
+<div class="stat-grid" style="margin-bottom:26px;">
+  <div class="stat"><b>{{ sites | length }}</b><span>WordPress sites</span></div>
+  <div class="stat"><b>{{ accounts | length }}</b><span>Social accounts</span></div>
+  <div class="stat"><b>{{ posts | length }}</b><span>Recent articles</span></div>
+  <div class="stat"><b>{{ scheduled | length }}</b><span>Queued posts</span></div>
+</div>
+
+<div class="result-card">
+  <div class="out-head">
+    <h2>WordPress sites</h2>
+    <a class="btn" href="{{ url_for('auth.dashboard') }}#connect">Connect a site</a>
+  </div>
+  {% if sites %}
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Site</th><th>Niche</th><th>Published</th><th>Autopilot</th><th>Last audit</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for s in sites %}
+        <tr>
+          <td><strong>{{ s.name or s.site_url }}</strong><br><span class="hint">{{ s.site_url }}</span></td>
+          <td>{{ s.niche or '-' }}</td>
+          <td>{{ s.posts_published }}</td>
+          <td>{% if s.autopilot_enabled %}<span class="badge badge-ok">On</span>{% else %}<span class="badge badge-warn">Off</span>{% endif %}</td>
+          <td>{{ s.last_audit_at.strftime('%d %b %Y') if s.last_audit_at else 'Not yet' }}</td>
+          <td>
+            {% if s.status == 'active' %}<span class="badge badge-ok">Active</span>
+            {% elif s.status == 'paused' %}<span class="badge badge-warn">Paused</span>
+            {% else %}<span class="badge badge-error">Error</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="hint">No sites connected yet. Connecting a site lets the suite research topics
+     in your niche, write full articles, link them into your existing posts, and schedule
+     them for publishing.</p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h2>Recent articles</h2>
+  {% if posts %}
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Title</th><th>Site</th><th>Words</th><th>Scheduled</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for p in posts %}
+        <tr>
+          <td>{% if p.permalink %}<a href="{{ p.permalink }}" rel="noopener" target="_blank">{{ p.title }}</a>{% else %}{{ p.title }}{% endif %}</td>
+          <td>{{ p.site_name or '-' }}</td>
+          <td>{{ p.word_count }}</td>
+          <td>{{ p.scheduled_for.strftime('%d %b, %H:%M') if p.scheduled_for else '-' }}</td>
+          <td>
+            {% if p.status == 'published' %}<span class="badge badge-ok">Published</span>
+            {% elif p.status == 'failed' %}<span class="badge badge-error">Failed</span>
+            {% else %}<span class="badge badge-warn">{{ p.status | capitalize }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="hint">Nothing written yet. Articles appear here once a site is connected and autopilot runs.</p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h2>Connected social accounts</h2>
+  {% if accounts %}
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Platform</th><th>Account</th><th>Token expires</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for a in accounts %}
+        <tr>
+          <td>{{ a.platform | capitalize }}</td>
+          <td>{{ a.display_name or a.username or '-' }}</td>
+          <td>{{ a.token_expires_at.strftime('%d %b %Y') if a.token_expires_at else '-' }}</td>
+          <td>
+            {% if a.status == 'active' %}<span class="badge badge-ok">Active</span>
+            {% else %}<span class="badge badge-error">{{ a.status | capitalize }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="hint">No social accounts connected yet.</p>
+  {% endif %}
+</div>
+
+{% if jobs %}
+<div class="result-card">
+  <h2>Recent background jobs</h2>
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Job</th><th>Type</th><th>Status</th><th>Started</th></tr></thead>
+      <tbody>
+        {% for j in jobs %}
+        <tr>
+          <td><code>{{ j.public_id[:10] }}</code></td>
+          <td>{{ j.kind.replace('_', ' ') | capitalize }}</td>
+          <td>
+            {% if j.status == 'done' %}<span class="badge badge-ok">Done</span>
+            {% elif j.status == 'error' %}<span class="badge badge-error">Error</span>
+            {% else %}<span class="badge badge-warn">{{ j.status | capitalize }}</span>{% endif %}
+          </td>
+          <td>{{ j.created_at.strftime('%d %b, %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="where-card" id="connect">
+  <h2>Connecting a WordPress site</h2>
+  <p>Connection uses a WordPress <strong>Application Password</strong>, not your normal login.
+     It is a separate credential you can revoke at any time without changing your password,
+     and it works on WordPress 5.6 and later.</p>
+  <ol>
+    <li>Sign in to your WordPress admin and open <strong>Users</strong>, then your profile.</li>
+    <li>Scroll to <strong>Application Passwords</strong>, enter a name such as "Kai SEO Suite", and click Add.</li>
+    <li>Copy the password WordPress shows you. It is displayed once and never again.</li>
+    <li>Paste it here along with your site address and WordPress username.</li>
+  </ol>
+  <p>The application password is encrypted before it is stored, with the key held outside the
+     database. If you ever want to cut access, delete the entry in WordPress and it stops
+     working immediately.</p>
+</div>
+{% endblock %}

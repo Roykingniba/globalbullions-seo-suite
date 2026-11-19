@@ -1,0 +1,31 @@
+Flask==3.0.3
+Jinja2==3.1.4
+Werkzeug==3.0.4
+requests==2.32.3
+beautifulsoup4==4.12.3
+lxml==5.3.0
+setuptools<81
+textstat==0.7.4
+Pillow==10.4.0
+pypdf==5.1.0
+
+# Phase 2 — site crawler / cannibalization / link mapper (heavier deps)
+pandas>=2.0.0
+numpy>=1.24.0
+networkx>=3.1
+pyvis>=0.3.2
+sentence-transformers>=2.2.0
+spacy>=3.6.0
+# en_core_web_sm model is NOT pip-installable by name — install via the direct
+# wheel URL at deploy time, see the deployment notes:
+# pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# Phase 3 - expanded PDF converter suite
+pymupdf>=1.24.0
+fpdf2>=2.7.0
+
+# Phase 4 - accounts, persistence and background jobs.
+# All three ship manylinux wheels, so the host needs no compiler.
+PyMySQL>=1.1.0          # pure-python MySQL driver, no libmysqlclient needed
+cryptography>=42.0.0    # AES-GCM for encrypting OAuth tokens at rest
+bcrypt>=4.1.0           # password hashing

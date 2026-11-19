@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Remove Duplicate Lines and Sort Lists{% endblock %}
+{% block meta_description %}Remove duplicate lines, sort a list, strip blank lines, shuffle or number a list of text.{% endblock %}
+{% block content %}
+{{ m.head("📋", "Line Tools", "Clean up a list of text. Remove duplicates, sort it, strip blank lines, or number every row.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="operation">What do you want to do</label>
+  <select id="operation" name="operation">
+    <option value="dedupe" {% if operation=='dedupe' %}selected{% endif %}>Remove duplicate lines</option>
+    <option value="dedupe_keep_blank" {% if operation=='dedupe_keep_blank' %}selected{% endif %}>Remove duplicates but keep blank lines</option>
+    <option value="sort_az" {% if operation=='sort_az' %}selected{% endif %}>Sort A to Z</option>
+    <option value="sort_za" {% if operation=='sort_za' %}selected{% endif %}>Sort Z to A</option>
+    <option value="sort_length" {% if operation=='sort_length' %}selected{% endif %}>Sort by line length</option>
+    <option value="reverse" {% if operation=='reverse' %}selected{% endif %}>Reverse the order</option>
+    <option value="shuffle" {% if operation=='shuffle' %}selected{% endif %}>Shuffle randomly</option>
+    <option value="remove_blank" {% if operation=='remove_blank' %}selected{% endif %}>Remove blank lines</option>
+    <option value="number" {% if operation=='number' %}selected{% endif %}>Number every line</option>
+  </select>
+
+  <label for="text">Your list</label>
+  <textarea id="text" name="text" style="min-height:220px; font-family:ui-monospace, monospace;" placeholder="One item per line...">{{ text }}</textarea>
+
+  {{ m.check("case_sensitive", "Treat different capitalisation as different lines", case_sensitive) }}
+  {{ m.check("trim", "Trim spaces from the start and end of each line", trim) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Run</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Summary</h2>
+  <div class="stat-grid">
+    <div class="stat"><b>{{ result.original_count }}</b><span>Lines in</span></div>
+    <div class="stat"><b>{{ result.result_count }}</b><span>Lines out</span></div>
+    <div class="stat"><b>{{ result.removed }}</b><span>Removed</span></div>
+  </div>
+</div>
+{{ m.output(result.text, "Result", "lines-out") }}
+{% endif %}
+
+<div class="where-card">
+  <h2>A note on capitalisation</h2>
+  <p>By default <code>Apple</code> and <code>apple</code> count as two different lines. Untick the capitalisation box
+     to treat them as the same, which is usually what you want for email addresses, URLs and keyword lists. The first
+     version of each line is the one kept.</p>
+</div>
+
+{{ m.where([
+  'Cleaning a keyword list? Export your keywords from Google Search Console under Performance, or from any keyword tool that offers a CSV download, then paste the keyword column here.',
+  'Deduplicating URLs? Copy them from your sitemap, from a crawl export, or from the Pages report in Search Console.',
+  'Tidying an email or contact list? Paste the column straight out of your spreadsheet. Each cell becomes one line.',
+  'Working in a spreadsheet? Select the column, copy, paste here, then copy the result back into the sheet.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

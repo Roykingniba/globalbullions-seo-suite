@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Internal Link Suggestions. Results{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔗 Internal Link Suggestions</h1>
+</div>
+
+{% if job.status in ('queued', 'running') %}
+<div class="result-card">
+  <h2>{{ 'Queued...' if job.status == 'queued' else 'Running...' }}</h2>
+  <p id="progress-phase">{{ job.progress.phase }}. {{ job.progress.current }}</p>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill" style="width: {{ ((job.progress.done / job.progress.total * 100) if job.progress.total else 0) }}%;"></div></div>
+  <p id="progress-count">{{ job.progress.done }} / {{ job.progress.total }} pages</p>
+</div>
+<script>
+(function poll() {
+  fetch(window.location.pathname + '/status').then(r => r.json()).then(data => {
+    if (data.status === 'done' || data.status === 'error') { window.location.reload(); return; }
+    const p = data.progress;
+    document.getElementById('progress-phase').textContent = (p.phase || '') + '. ' + (p.current || '');
+    document.getElementById('progress-count').textContent = p.done + ' / ' + p.total + ' pages';
+    if (p.total) document.getElementById('progress-fill').style.width = (p.done / p.total * 100) + '%';
+    setTimeout(poll, 2000);
+  }).catch(() => setTimeout(poll, 3000));
+})();
+</script>
+{% elif job.status == 'error' %}
+<div class="flash flash-error">{{ job.error }}</div>
+{% elif job.status == 'done' %}
+{% set r = job.result %}
+<div class="result-card">
+  <h2>{{ r.target_title or r.target_url }}</h2>
+  <p class="hint">{{ r.target_url }}. {{ r.pages_crawled }} page(s) crawled on this site.</p>
+</div>
+
+<div class="result-card">
+  <h3>Pages that should link TO this page ({{ r.incoming|length }})</h3>
+  {% if r.incoming %}
+  <table class="result-table">
+    <thead><tr><th>From page</th><th>Suggested anchor</th><th>Relevance</th></tr></thead>
+    <tbody>
+      {% for o in r.incoming %}
+      <tr><td>{{ o.source_url }}</td><td>{{ o.recommended_anchor_text }}</td><td>{{ (o.semantic_relevance_score * 100) | round(1) }}%</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No strong candidates found. Try crawling more pages.</p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h3>Pages this page should link OUT to ({{ r.outgoing|length }})</h3>
+  {% if r.outgoing %}
+  <table class="result-table">
+    <thead><tr><th>To page</th><th>Suggested anchor</th><th>Relevance</th></tr></thead>
+    <tbody>
+      {% for o in r.outgoing %}
+      <tr><td>{{ o.target_url }}</td><td>{{ o.recommended_anchor_text }}</td><td>{{ (o.semantic_relevance_score * 100) | round(1) }}%</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No strong candidates found. Try crawling more pages.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

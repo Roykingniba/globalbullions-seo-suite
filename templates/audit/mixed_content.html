@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Mixed Content Checker{% endblock %}
+{% block meta_description %}Scan an HTTPS page for insecure http:// resource references (images, scripts, stylesheets).{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔒 Mixed Content Checker</h1>
+  <p>Scans an HTTPS page for insecure http:// resource references that browsers may block or warn about.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL (must be https://)</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Scan</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  {% if not result.applicable %}
+  <p><span class="badge badge-warn">Not applicable</span>. The fetched page wasn't served over HTTPS.</p>
+  {% elif result.insecure_resources %}
+  <p><span class="badge badge-error">{{ result.insecure_resources|length }} insecure resource(s) found</span></p>
+  <table class="result-table">
+    <thead><tr><th>Tag</th><th>Attribute</th><th>URL</th></tr></thead>
+    <tbody>
+      {% for r in result.insecure_resources %}
+      <tr><td>{{ r.tag }}</td><td>{{ r.attr }}</td><td>{{ r.url }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p><span class="badge badge-ok">No mixed content found</span></p>
+  {% endif %}
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Internal Link Suggestions{% endblock %}
+{% block meta_description %}Find which existing pages should link to a specific page, and which pages it should link out to, using semantic similarity.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔗 Internal Link Suggestions</h1>
+  <p>Focused on one page: crawls the rest of the site and finds which existing pages should link to it, and which pages it should link out to, based on semantic similarity. Not just keyword overlap.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="target_url">Target page (the one you want more internal links for)</label>
+  <input type="text" id="target_url" name="target_url" placeholder="example.com/some-page">
+
+  <label for="site_url">Site homepage (leave blank to use the target page's own domain)</label>
+  <input type="text" id="site_url" name="site_url" placeholder="example.com">
+
+  <label for="max_pages">Max pages to crawl (up to {{ "{:,}".format(max_crawl_pages) }})</label>
+  <input type="text" id="max_pages" name="max_pages" value="200">
+
+  <button class="btn" type="submit">🚀 Find internal link opportunities</button>
+</form>
+{% include "_tool_seo.html" %}
+{% endblock %}

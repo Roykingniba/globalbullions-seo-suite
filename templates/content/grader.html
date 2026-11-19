@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Content Grader & Keyword Optimizer{% endblock %}
+{% block meta_description %}Score your draft against a target keyword as you type. Checks placement, density, readability and structure. Free, nothing stored.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>✍️ Content Grader &amp; Keyword Optimizer</h1>
+  <p>Enter a target keyword, paste or write your content, and watch the score and checklist update live as you edit. Plus a content-driven guess at what your text is already positioned to target.</p>
+</div>
+
+<div class="grader-toolbar">
+  <input type="text" id="grader-url" placeholder="Or fetch an existing page's text: example.com/some-page">
+  <button class="btn" type="button" id="grader-fetch-btn">Fetch page text</button>
+</div>
+<div id="grader-fetch-error" class="flash flash-error" style="display:none;"></div>
+
+<div class="grader-layout">
+  <div>
+    <div class="grader-inputs">
+      <div>
+        <label class="field-label" for="grader-keyword">Target keyword</label>
+        <input type="text" id="grader-keyword" placeholder="e.g. content grader tool" class="field-input">
+      </div>
+      <div>
+        <label class="field-label" for="grader-title">Page title (optional)</label>
+        <input type="text" id="grader-title" placeholder="Your <title> or H1" class="field-input">
+      </div>
+    </div>
+    <label class="field-label" for="grader-secondary">Secondary keywords (optional, one per line)</label>
+    <textarea id="grader-secondary" placeholder="content optimization&#10;keyword density checker" class="field-input" rows="2"></textarea>
+
+    <label class="field-label" for="grader-content">Content (use "# " or "## " at the start of a line for headings)</label>
+    <textarea id="grader-content" placeholder="Write or paste your content here. The score updates as you type..."></textarea>
+  </div>
+
+  <div class="grader-panel">
+    <div class="grader-score-row">
+      <div class="grader-score" id="grader-score">–</div>
+      <div class="grader-stats">
+        <div><strong id="grader-wordcount">0</strong> words · <strong id="grader-headingcount">0</strong> headings</div>
+        <div>Keyword density: <strong id="grader-density">0%</strong> (<span id="grader-kwcount">0</span> uses)</div>
+        <div>Readability: <strong id="grader-readability">–</strong></div>
+      </div>
+    </div>
+    <div id="grader-checklist"></div>
+    <div style="margin-top:14px;">
+      <strong style="font-size:13px;">This content could also target:</strong>
+      <div class="suggested-keywords" id="grader-suggestions"></div>
+      <p class="hint" style="margin-top:8px;">Based on your content's own word/phrase emphasis, not search-volume data. Pair with the <a href="{{ url_for('keywords.ideas') }}">Keyword Ideas Generator</a> to check real search interest.</p>
+    </div>
+  </div>
+</div>
+
+<div class="result-card" style="margin-top:32px;">
+  <h2 style="margin-top:0;">Helpful Content Self-Assessment</h2>
+  <p class="hint" style="margin: -4px 0 12px;">Straight from Google's own published guidance on people-first content. These can't be graded automatically, so check them yourself as you write.</p>
+  <ul class="helpful-checklist">
+    {% for q in helpful_checklist %}
+    <li><input type="checkbox">{{ q }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% include "_tool_seo.html" %}
+{% endblock %}
+{% block scripts %}
+<script>
+  window.gradeEndpoint = {{ url_for('content.grader_api') | tojson }};
+  window.fetchEndpoint = {{ url_for('content.grader_fetch') | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/content_grader.js') }}"></script>
+{% endblock %}

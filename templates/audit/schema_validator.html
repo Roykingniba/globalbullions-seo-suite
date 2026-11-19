@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Structured Data (JSON-LD) Validator{% endblock %}
+{% block meta_description %}Extract JSON-LD blocks from a page and check required fields for common schema.org types.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🧩 Structured Data (JSON-LD) Validator</h1>
+  <p>Extracts all JSON-LD blocks from a page and checks required fields for common schema.org types. Schema completeness is linked to higher AI-citation rates.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Validate</button>
+</form>
+
+{% if results is not none %}
+<div class="result-card">
+  <h2>{{ results|length }} JSON-LD block(s) found</h2>
+  {% if not results %}
+  <p><span class="badge badge-warn">No structured data found</span>. Consider adding JSON-LD for your content type.</p>
+  {% endif %}
+  {% for r in results %}
+  <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+    {% if r.raw_error %}
+    <p><span class="badge badge-error">Invalid JSON</span> This block couldn't be parsed.</p>
+    {% else %}
+    <p><strong>{{ r.type }}</strong>
+      {% if r.missing_fields %}<span class="badge badge-warn">Missing fields</span>{% else %}<span class="badge badge-ok">Complete</span>{% endif %}
+    </p>
+    {% if r.missing_fields %}<p>Missing: {{ r.missing_fields | join(', ') }}</p>{% endif %}
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

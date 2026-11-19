@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Duplicate Content / Page Similarity Checker{% endblock %}
+{% block meta_description %}Compare two live pages for content similarity. Word overlap, phrase overlap, and sequence match, to spot near-duplicate content.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>📑 Duplicate Content / Page Similarity Checker</h1>
+  <p>Compares two live pages using three different similarity measures to help spot near-duplicate or cannibalizing content.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url_a">Page A</label>
+  <input type="text" id="url_a" name="url_a" value="{{ url_a_input }}" placeholder="example.com/page-a">
+  <label for="url_b">Page B</label>
+  <input type="text" id="url_b" name="url_b" value="{{ url_b_input }}" placeholder="example.com/page-b">
+  <button class="btn" type="submit">Compare pages</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Overall similarity: {{ result.overall_similarity_pct }}%</h2>
+  <table class="result-table">
+    <tbody>
+      <tr><td>Word overlap (cosine similarity)</td><td>{{ result.word_overlap_pct }}%</td></tr>
+      <tr><td>Phrase overlap (3-word shingles)</td><td>{{ result.phrase_overlap_pct }}%</td></tr>
+      <tr><td>Sequence match</td><td>{{ result.sequence_match_pct }}%</td></tr>
+      <tr><td>Word count (A / B)</td><td>{{ result.word_count_a }} / {{ result.word_count_b }}</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">Above roughly 70% overall similarity is worth a closer look for content cannibalization or accidental duplication.</p>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

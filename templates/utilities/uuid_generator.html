@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}UUID Generator{% endblock %}
+{% block meta_description %}Generate random version 4 UUIDs in bulk, with options for case, braces and hyphens.{% endblock %}
+{% block content %}
+{{ m.head("🆔", "UUID Generator", "Generate random version 4 UUIDs, up to 500 at a time.") }}
+
+<form class="tool-form" method="post">
+  <label for="count">How many</label>
+  <input type="number" id="count" name="count" min="1" max="500" value="{{ count }}">
+
+  <div class="opt-inline">
+    {{ m.check("hyphens", "Keep hyphens", hyphens) }}
+    {{ m.check("uppercase", "Uppercase", uppercase) }}
+    {{ m.check("braces", "Wrap in braces", braces) }}
+  </div>
+  <button class="btn" type="submit" style="margin-top:14px;">Generate</button>
+</form>
+
+{% if results %}
+<div class="result-card">
+  <div class="out-head">
+    <h2>{{ results | length }} UUID{{ 's' if results|length != 1 }}</h2>
+    <button class="btn btn-secondary btn-copy" type="button" data-copy="uuid-out">Copy all</button>
+  </div>
+  <pre class="out-pre" id="uuid-out">{% for u in results %}{{ u }}
+{% endfor %}</pre>
+</div>
+{% endif %}
+
+<div class="where-card">
+  <h2>What a UUID is for</h2>
+  <p>A UUID is a 128-bit identifier written as 32 hexadecimal characters. The point is that you can generate one
+     anywhere, with no central authority handing out numbers, and still be confident nobody else will generate the
+     same one.</p>
+  <p>Version 4 UUIDs, which this tool produces, are almost entirely random. The odds of a collision are so small that
+     in practice you can ignore them.</p>
+  <p><strong>They are random, not secret.</strong> A UUID is fine as an identifier but should not be used as a password,
+     a session token or an access key on its own.</p>
+  <p>They also sort poorly. Because version 4 UUIDs are random, using one as a primary key in a database can hurt
+     insert performance on large tables. If that matters to you, look at UUID version 7, which sorts by time.</p>
+</div>
+
+{{ m.where([
+  'You do not need to fetch anything. Choose how many you want and generate.',
+  'Seeding test data? Generate the number of rows you need and paste the column straight into your spreadsheet or SQL insert.',
+  'Need one identifier for a config file or a tracking parameter? Generate a single UUID and copy it.',
+  'Some systems expect uppercase or braces around the value, which is common in Windows and .NET tooling. Tick those boxes to match the format you have been given.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

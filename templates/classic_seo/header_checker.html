@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}HTTP & Security Header Checker{% endblock %}
+{% block meta_description %}Fetch raw response headers and flag missing security headers (HSTS, CSP, X-Frame-Options, etc.).{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🛡️ HTTP &amp; Security Header Checker</h1>
+  <p>Fetch a URL's raw response headers and check for common security headers.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com">
+  <button class="btn" type="submit">Check headers</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Status: {{ result.status_code }}</h2>
+</div>
+
+<div class="result-card">
+  <h3>Security headers</h3>
+  <table class="result-table">
+    <thead><tr><th>Header</th><th>Purpose</th><th>Value</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for h in result.security %}
+      <tr>
+        <td>{{ h.name }}</td>
+        <td>{{ h.description }}</td>
+        <td>{{ h.value or '-' }}</td>
+        <td>{% if h.present %}<span class="badge badge-ok">Present</span>{% else %}<span class="badge badge-warn">Missing</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="result-card">
+  <h3>All response headers</h3>
+  <table class="result-table">
+    <tbody>
+      {% for k, v in result.headers.items() %}
+      <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

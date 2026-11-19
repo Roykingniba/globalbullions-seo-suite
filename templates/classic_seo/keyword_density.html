@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Keyword Density & Readability Analyzer{% endblock %}
+{% block meta_description %}Analyze keyword frequency, n-grams, and Flesch reading ease for any page or pasted text.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>📊 Keyword Density &amp; Readability Analyzer</h1>
+  <p>Fetch a page (or paste your own text) to see top keywords/phrases, target-keyword density, and readability scores.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL (leave blank to paste text instead)</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+
+  <label for="text">Or paste text directly</label>
+  <textarea id="text" name="text" placeholder="Paste content here...">{{ text_input }}</textarea>
+
+  <label for="keyword">Target keyword or phrase (optional)</label>
+  <input type="text" id="keyword" name="keyword" value="{{ keyword_input }}" placeholder="e.g. seo tools">
+
+  <button class="btn" type="submit">Analyze</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Overview</h2>
+  <p><strong>{{ result.word_count }}</strong> words analyzed.</p>
+  {% if result.readability %}
+  <table class="result-table">
+    <tbody>
+      <tr><td>Flesch Reading Ease</td><td>{{ result.readability.flesch_reading_ease }}</td></tr>
+      <tr><td>Flesch-Kincaid Grade Level</td><td>{{ result.readability.flesch_kincaid_grade }}</td></tr>
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+{% if result.target_density %}
+<div class="result-card">
+  <h3>Target keyword: "{{ result.target_density.keyword }}"</h3>
+  <p><strong>{{ result.target_density.count }}</strong> occurrences. <strong>{{ result.target_density.density_pct }}%</strong> density.
+  {% if result.target_density.density_pct > 3 %}<span class="badge badge-warn">Possibly over-optimized</span>{% else %}<span class="badge badge-ok">Reasonable</span>{% endif %}</p>
+</div>
+{% endif %}
+
+<div class="result-card">
+  <h3>Top single words</h3>
+  <table class="result-table">
+    <thead><tr><th>Word</th><th>Count</th></tr></thead>
+    <tbody>
+      {% for word, count in result.unigrams %}
+      <tr><td>{{ word }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="result-card">
+  <h3>Top 2-word phrases</h3>
+  <table class="result-table">
+    <thead><tr><th>Phrase</th><th>Count</th></tr></thead>
+    <tbody>
+      {% for phrase, count in result.bigrams %}
+      <tr><td>{{ phrase }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="result-card">
+  <h3>Top 3-word phrases</h3>
+  <table class="result-table">
+    <thead><tr><th>Phrase</th><th>Count</th></tr></thead>
+    <tbody>
+      {% for phrase, count in result.trigrams %}
+      <tr><td>{{ phrase }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

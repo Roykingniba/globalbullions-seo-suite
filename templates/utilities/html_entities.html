@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}HTML Entity Encoder and Decoder{% endblock %}
+{% block meta_description %}Convert characters to HTML entities so they display as text, or decode entities back.{% endblock %}
+{% block content %}
+{{ m.head("⟨⟩", "HTML Entity Encoder and Decoder", "Turn characters into HTML entities so they show up as text on a page, or decode entities back into plain characters.") }}
+
+<form class="tool-form" method="post">
+  <label for="action">Direction</label>
+  <select id="action" name="action">
+    <option value="encode" {% if action=='encode' %}selected{% endif %}>Text to entities</option>
+    <option value="decode" {% if action=='decode' %}selected{% endif %}>Entities to text</option>
+  </select>
+
+  <label for="text">Input</label>
+  <textarea id="text" name="text" style="min-height:170px; font-family:ui-monospace, monospace;" placeholder="Paste your HTML or text here...">{{ text }}</textarea>
+
+  {{ m.check("quotes", "Also encode quote marks", quotes) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Convert</button>
+</form>
+
+{% if result %}{{ m.output(result, "Result", "ent-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>When you need this</h2>
+  <p>Some characters mean something specific to a browser. A <code>&lt;</code> starts a tag, and an <code>&amp;</code>
+     starts an entity. If you want those characters to appear on the page as themselves rather than being interpreted,
+     they have to be written as entities: <code>&amp;lt;</code> and <code>&amp;amp;</code>.</p>
+  <p>This comes up most often when you are writing about code. To show a reader an example tag, you have to encode it,
+     or the browser will render the tag instead of displaying it.</p>
+  <p>Encoding quote marks matters when you are placing a value inside an HTML attribute. An unencoded quote closes the
+     attribute early and breaks the tag.</p>
+</div>
+
+{{ m.where([
+  'Writing a tutorial with code examples? Paste your example markup here and encode it before putting it into your page or CMS.',
+  'Seeing &amp;amp; or &amp;#39; showing up literally on your live pages? Copy the affected text and decode it here to confirm it has been encoded twice, which is a common CMS bug.',
+  'Pulling content from an API or an RSS feed? Those often arrive with entities already in place. Decode them before you display or analyse the text.',
+  'Pasting text into an HTML attribute such as a title or alt? Encode it with the quote box ticked first.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

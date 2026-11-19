@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Account settings{% endblock %}
+{% block meta_description %}Manage your password and active sessions.{% endblock %}
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>Account</h1>
+    <p>{{ user.email }}</p>
+  </div>
+  <div class="dash-actions">
+    <a class="btn btn-secondary" href="{{ url_for('auth.dashboard') }}">Back to dashboard</a>
+  </div>
+</div>
+
+{% if notice %}<div class="flash flash-info">{{ notice }}</div>{% endif %}
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<div class="result-card" style="max-width:520px;">
+  <h2>Change password</h2>
+  <form method="post" class="tool-form" style="border:none; padding:0; box-shadow:none; margin:0;">
+    <label for="current_password">Current password</label>
+    <input type="password" id="current_password" name="current_password"
+           autocomplete="current-password" required>
+
+    <label for="new_password">New password</label>
+    <input type="password" id="new_password" name="new_password"
+           autocomplete="new-password" required minlength="10">
+    <p class="hint">At least 10 characters. Changing this signs you out everywhere else.</p>
+
+    <button class="btn" type="submit">Update password</button>
+  </form>
+</div>
+
+<div class="result-card">
+  <h2>Active sessions</h2>
+  <p class="hint">Each device you sign in from creates a session. Changing your password
+     ends every session except the one you are using now.</p>
+  {% if sessions %}
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Signed in</th><th>Expires</th><th>Device</th></tr></thead>
+      <tbody>
+        {% for s in sessions %}
+        <tr>
+          <td>{{ s.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+          <td>{{ s.expires_at.strftime('%d %b %Y') }}</td>
+          <td class="hint">{{ (s.user_agent or 'Unknown')[:70] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

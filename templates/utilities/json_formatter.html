@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}JSON Formatter and Validator{% endblock %}
+{% block meta_description %}Format messy JSON so it is readable, or minify it. Errors point at the line that broke.{% endblock %}
+{% block content %}
+{{ m.head("{ }", "JSON Formatter and Validator", "Tidy up messy JSON so you can read it, or squash it down for production. Errors tell you which line to look at.") }}
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="text">Your JSON</label>
+  <textarea id="text" name="text" style="min-height:230px; font-family:ui-monospace, monospace;" placeholder='{"name":"example","items":[1,2,3]}'>{{ text }}</textarea>
+
+  <div class="opt-row">
+    <div>
+      <label for="indent">Indent</label>
+      <select id="indent" name="indent">
+        <option value="2" {% if indent=='2' %}selected{% endif %}>2 spaces</option>
+        <option value="4" {% if indent=='4' %}selected{% endif %}>4 spaces</option>
+        <option value="0" {% if indent=='0' %}selected{% endif %}>No indent</option>
+      </select>
+    </div>
+  </div>
+
+  {{ m.check("sort_keys", "Sort keys alphabetically", sort_keys) }}
+  {{ m.check("minify", "Minify instead (strip all spacing)", minify) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Format</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Valid JSON</h2>
+  <div class="stat-grid">
+    <div class="stat"><b>{{ result.kind }}</b><span>Top-level type</span></div>
+    <div class="stat"><b>{{ result.top_level_keys }}</b><span>Top-level items</span></div>
+    <div class="stat"><b>{{ result.original_bytes }}</b><span>Bytes in</span></div>
+    <div class="stat"><b>{{ result.result_bytes }}</b><span>Bytes out</span></div>
+  </div>
+</div>
+{{ m.output(result.text, "Formatted", "json-out") }}
+{% endif %}
+
+<div class="where-card">
+  <h2>The mistakes that break JSON most often</h2>
+  <ul>
+    <li><strong>A trailing comma</strong> after the last item. JavaScript tolerates it, JSON does not.</li>
+    <li><strong>Single quotes.</strong> JSON requires double quotes around both keys and string values.</li>
+    <li><strong>Unquoted keys.</strong> <code>{name: "x"}</code> is JavaScript, not JSON. It has to be <code>{"name": "x"}</code>.</li>
+    <li><strong>Comments.</strong> JSON has no comment syntax, so a <code>//</code> line will fail.</li>
+    <li><strong>Smart quotes.</strong> Copying JSON out of a word processor or a chat app often replaces straight quotes
+        with curly ones, which look almost identical but are not valid.</li>
+  </ul>
+  <p>When something fails, the error above names the line and column, so start there.</p>
+</div>
+
+{{ m.where([
+  'Checking an API response? Open your browser developer tools, go to the Network tab, click the request, and copy the response body.',
+  'Validating structured data for a page? Copy everything between the script tags of your JSON-LD block. For a full check against Google\'s rules, use the Structured Data Validator on this site instead.',
+  'Working with a config file such as package.json or composer.json? Open it in any text editor and paste the whole file.',
+  'Reading a log line that contains JSON? Copy just the JSON portion, from the opening brace to the matching closing brace.',
+  'Sorting keys makes it much easier to compare two JSON files. Sort both, then run them through the Text Compare tool.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

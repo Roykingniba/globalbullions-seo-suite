@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}SERP Snippet Preview Tool{% endblock %}
+{% block meta_description %}Preview how a page's title and meta description will look in Google search results, with length warnings.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔍 SERP Snippet Preview</h1>
+  <p>See how a page's title and meta description are likely to render in Google search results.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Page URL</label>
+  <input type="text" id="url" name="url" value="{{ url_input }}" placeholder="example.com/some-page">
+  <button class="btn" type="submit">Preview</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Preview</h2>
+  <div class="serp-preview">
+    <p class="serp-url">{{ result.url }}</p>
+    <p class="serp-title">{{ result.title }}</p>
+    <p class="serp-desc">{{ result.description }}</p>
+  </div>
+</div>
+<div class="result-card">
+  <h3>Length checks</h3>
+  <table class="result-table">
+    <thead><tr><th>Field</th><th>Length</th><th>Recommended</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Title tag</td>
+        <td>{{ result.title_len }} chars</td>
+        <td>15–60 chars</td>
+        <td>{% if result.title_ok %}<span class="badge badge-ok">Good</span>{% else %}<span class="badge badge-warn">Check length</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Meta description</td>
+        <td>{{ result.description_len }} chars</td>
+        <td>70–160 chars</td>
+        <td>{% if result.description_ok %}<span class="badge badge-ok">Good</span>{% else %}<span class="badge badge-warn">Check length</span>{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

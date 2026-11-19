@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Site Crawler & Semantic Audit{% endblock %}
+{% block meta_description %}Crawl a whole site to detect content cannibalization, find internal link opportunities, and audit titles/meta/H1s. With an interactive link graph.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🕸️ Site Crawler &amp; Semantic Audit</h1>
+  <p>Crawls an entire site (up to {{ "{:,}".format(max_crawl_pages) }} pages), scores content quality, detects content cannibalization via semantic similarity, and suggests internal linking opportunities. Runs in the background. Larger sites can take several minutes.</p>
+</div>
+
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<form class="tool-form" method="post">
+  <label for="url">Site URL (homepage)</label>
+  <input type="text" id="url" name="url" placeholder="example.com">
+
+  <label for="max_pages">Max pages to crawl (up to {{ "{:,}".format(max_crawl_pages) }})</label>
+  <input type="text" id="max_pages" name="max_pages" value="200">
+  <p class="hint">Larger crawls take longer and use more memory. Very large sites (tens of thousands of pages) are capped to keep the whole site stable for everyone.</p>
+
+  <button class="btn" type="submit">🚀 Start audit</button>
+</form>
+{% include "_tool_seo.html" %}
+{% endblock %}

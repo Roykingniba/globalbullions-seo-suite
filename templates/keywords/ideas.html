@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Keyword Ideas & Question Generator{% endblock %}
+{% block meta_description %}Expand a seed keyword into hundreds of real autocomplete-based suggestions, questions, and comparison phrases. No search-volume data, pure ideation.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>💡 Keyword Ideas &amp; Question Generator</h1>
+  <p>Expands one seed keyword into real phrases people actually search, using Google's public autocomplete suggestions plus question and comparison patterns. No search-volume numbers. That needs a paid keyword-research API. Just breadth of real phrasing for content ideation.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="seed">Seed keyword</label>
+  <input type="text" id="seed" name="seed" value="{{ seed_input }}" placeholder="e.g. content grader">
+  <button class="btn" type="submit">Generate ideas</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>{{ result.total_count }} idea(s) for "{{ result.seed }}"</h2>
+</div>
+
+{% if result.questions %}
+<div class="result-card">
+  <h3>Question-based keywords</h3>
+  <div class="suggested-keywords">
+    {% for q in result.questions %}<span>{{ q }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if result.prepositions %}
+<div class="result-card">
+  <h3>Comparison &amp; preposition keywords</h3>
+  <div class="suggested-keywords">
+    {% for p in result.prepositions %}<span>{{ p }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if result.autocomplete %}
+<div class="result-card">
+  <h3>Direct autocomplete suggestions</h3>
+  <div class="suggested-keywords">
+    {% for a in result.autocomplete %}<span>{{ a }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if result.alphabet %}
+<div class="result-card">
+  <h3>Alphabet soup (seed + each letter)</h3>
+  {% for letter, suggestions in result.alphabet.items() %}
+  <p><strong>{{ letter }}</strong>. {{ suggestions | join(', ') }}</p>
+  {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

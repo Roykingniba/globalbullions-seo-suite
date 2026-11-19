@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Bulk Redirect & Status Checker{% endblock %}
+{% block meta_description %}Check a list of URLs for status codes, redirect chains, and redirect loops.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🔗 Bulk Redirect &amp; Status Checker</h1>
+  <p>Paste any number of URLs. We'll follow each redirect chain hop-by-hop and flag loops or excessive hops.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="urls">URLs (one per line)</label>
+  <textarea id="urls" name="urls" placeholder="example.com/old-page&#10;example.com/another-page">{{ urls_input }}</textarea>
+  <button class="btn" type="submit">Check URLs</button>
+</form>
+
+{% if results %}
+{% for r in results %}
+<div class="result-card">
+  <h3>{{ r.input }}
+    {% if r.status == 'ok' %}<span class="badge badge-ok">OK</span>
+    {% elif r.status == 'loop' %}<span class="badge badge-error">Redirect loop</span>
+    {% elif r.status == 'too_many' %}<span class="badge badge-error">Too many redirects</span>
+    {% elif r.status == 'invalid' %}<span class="badge badge-error">Invalid URL</span>
+    {% else %}<span class="badge badge-error">Error</span>{% endif %}
+  </h3>
+  {% if r.error %}<p>{{ r.error }}</p>{% endif %}
+  {% if r.chain %}
+  <table class="result-table">
+    <thead><tr><th>#</th><th>URL</th><th>Status</th><th>Redirects to</th></tr></thead>
+    <tbody>
+      {% for hop in r.chain %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ hop.url }}</td>
+        <td>{{ hop.status if hop.status else '-' }}</td>
+        <td>{{ hop.location if hop.get('location') else (hop.error if hop.error else '-') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

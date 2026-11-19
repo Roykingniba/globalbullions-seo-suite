@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Site Crawl & Semantic Audit. Results{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🕸️ Site Crawl &amp; Semantic Audit</h1>
+</div>
+
+{% if job.status in ('queued', 'running') %}
+<div class="result-card" id="progress-card">
+  <h2>{{ 'Queued...' if job.status == 'queued' else 'Running...' }}</h2>
+  <p id="progress-phase">{{ job.progress.phase }}. {{ job.progress.current }}</p>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill" style="width: {{ ((job.progress.done / job.progress.total * 100) if job.progress.total else 0) }}%;"></div></div>
+  <p id="progress-count">{{ job.progress.done }} / {{ job.progress.total }} pages</p>
+</div>
+<script>
+(function poll() {
+  fetch(window.location.pathname + '/status').then(r => r.json()).then(data => {
+    if (data.status === 'done' || data.status === 'error') {
+      window.location.reload();
+      return;
+    }
+    const p = data.progress;
+    document.getElementById('progress-phase').textContent = (p.phase || '') + '. ' + (p.current || '');
+    document.getElementById('progress-count').textContent = p.done + ' / ' + p.total + ' pages';
+    if (p.total) {
+      document.getElementById('progress-fill').style.width = (p.done / p.total * 100) + '%';
+    }
+    setTimeout(poll, 2000);
+  }).catch(() => setTimeout(poll, 3000));
+})();
+</script>
+
+{% elif job.status == 'error' %}
+<div class="flash flash-error">Audit failed: {{ job.error }}</div>
+
+{% elif job.status == 'done' %}
+{% set r = job.result %}
+<div class="result-card">
+  <h2>{{ r.pages_crawled }} page(s) crawled ({{ r.failed }} failed). Avg content score {{ r.avg_content_score }}/100</h2>
+  {% if r.graph_available %}
+  <p><a href="{{ url_for('linkgraph.site_audit_job_graph', job_id=job_id) }}" target="_blank" rel="noopener">🕸️ View interactive link graph →</a></p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h3>Technical findings</h3>
+  <table class="result-table">
+    <thead><tr><th>Issue</th><th>Pages affected</th></tr></thead>
+    <tbody>
+      <tr><td>Missing title tags</td><td>{{ r.findings.missing_titles|length }}</td></tr>
+      <tr><td>Duplicate title tags</td><td>{{ r.findings.duplicate_titles|length }}</td></tr>
+      <tr><td>Missing meta descriptions</td><td>{{ r.findings.missing_meta|length }}</td></tr>
+      <tr><td>Missing H1</td><td>{{ r.findings.missing_h1|length }}</td></tr>
+      <tr><td>Duplicate H1</td><td>{{ r.findings.duplicate_h1|length }}</td></tr>
+      <tr><td>Thin content (&lt;300 words)</td><td>{{ r.findings.thin_content|length }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="result-card">
+  <h3>Content cannibalization ({{ r.conflict_summary.total_conflicts }} conflict(s))</h3>
+  {% if r.conflicts %}
+  <div style="overflow-x:auto;">
+  <table class="result-table">
+    <thead><tr><th>URL A</th><th>URL B</th><th>Similarity</th><th>Suggested master</th></tr></thead>
+    <tbody>
+      {% for c in r.conflicts[:30] %}
+      <tr>
+        <td>{{ c.url_a }}</td><td>{{ c.url_b }}</td>
+        <td>{{ (c.similarity_score * 100) | round(1) }}%</td>
+        <td>{{ c.master_url }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p><span class="badge badge-ok">No cannibalization conflicts found</span></p>
+  {% endif %}
+</div>
+
+<div class="result-card">
+  <h3>Internal link opportunities ({{ r.opportunities_total }} found, showing top {{ r.opportunities|length }})</h3>
+  {% if r.opportunities %}
+  <div style="overflow-x:auto;">
+  <table class="result-table">
+    <thead><tr><th>From</th><th>To</th><th>Suggested anchor</th><th>Relevance</th></tr></thead>
+    <tbody>
+      {% for o in r.opportunities %}
+      <tr>
+        <td>{{ o.source_url }}</td><td>{{ o.target_url }}</td>
+        <td>{{ o.recommended_anchor_text }}</td>
+        <td>{{ (o.semantic_relevance_score * 100) | round(1) }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p>No link opportunities found. Try a larger crawl or a lower relevance threshold.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

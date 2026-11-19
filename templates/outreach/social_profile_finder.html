@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Social Profile Finder{% endblock %}
+{% block meta_description %}Find a domain's linked social media profiles (X, LinkedIn, Facebook, Instagram, and more) in bulk.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🌐 Social Profile Finder</h1>
+  <p>Finds the social media profiles a domain links to from its homepage. Useful for building a fuller outreach contact record beyond just an email address.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="domains">Domains (one per line. No limit)</label>
+  <textarea id="domains" name="domains" placeholder="backlinko.com&#10;smashingmagazine.com">{{ domains_input }}</textarea>
+  <button class="btn" type="submit">Find social profiles</button>
+</form>
+
+{% if results %}
+{% for r in results %}
+<div class="result-card">
+  <h3>{{ r.domain }}</h3>
+  {% if r.error %}
+  <p><span class="badge badge-error">Couldn't fetch</span> {{ r.error }}</p>
+  {% elif r.profiles %}
+  <table class="result-table">
+    <thead><tr><th>Platform</th><th>Profile URL</th></tr></thead>
+    <tbody>
+      {% for platform, url in r.profiles.items() %}
+      <tr><td>{{ platform }}</td><td><a href="{{ url }}" target="_blank" rel="noopener">{{ url }}</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No linked social profiles found on the homepage.</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Word and Character Counter{% endblock %}
+{% block meta_description %}Count words, characters, sentences and paragraphs, with reading time and word frequency.{% endblock %}
+{% block content %}
+{{ m.head("🔢", "Word and Character Counter", "Paste your text to get word and character counts, reading time, and the words you lean on most.") }}
+
+<form class="tool-form" method="post">
+  <label for="text">Your text</label>
+  <textarea id="text" name="text" style="min-height:240px;" placeholder="Paste or type your text here...">{{ text }}</textarea>
+  <button class="btn" type="submit">Count</button>
+</form>
+
+{% if stats %}
+<div class="result-card">
+  <h2>Counts</h2>
+  <div class="stat-grid">
+    <div class="stat"><b>{{ stats.words }}</b><span>Words</span></div>
+    <div class="stat"><b>{{ stats.characters }}</b><span>Characters</span></div>
+    <div class="stat"><b>{{ stats.characters_no_spaces }}</b><span>No spaces</span></div>
+    <div class="stat"><b>{{ stats.sentences }}</b><span>Sentences</span></div>
+    <div class="stat"><b>{{ stats.paragraphs }}</b><span>Paragraphs</span></div>
+    <div class="stat"><b>{{ stats.lines }}</b><span>Lines</span></div>
+    <div class="stat"><b>{{ stats.unique_words }}</b><span>Unique words</span></div>
+    <div class="stat"><b>{{ stats.avg_word_length }}</b><span>Avg word length</span></div>
+    <div class="stat"><b>{{ stats.reading_time }}</b><span>Reading time</span></div>
+    <div class="stat"><b>{{ stats.speaking_time }}</b><span>Speaking time</span></div>
+  </div>
+  <p class="hint" style="margin-top:14px;">Reading time assumes 200 words a minute and speaking time assumes 130.
+     Those are common averages, so treat them as a guide rather than a measurement.</p>
+</div>
+
+{% if stats.top_words %}
+<div class="result-card">
+  <h2>Words you use most</h2>
+  <div class="table-scroll">
+    <table class="result-table">
+      <thead><tr><th>Word</th><th>Times used</th><th>Share of text</th></tr></thead>
+      <tbody>
+        {% for word, n in stats.top_words %}
+        <tr>
+          <td><code>{{ word }}</code></td>
+          <td>{{ n }}</td>
+          <td>{{ (n / stats.words * 100) | round(1) }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:12px;">If one word takes a much bigger share than the rest, your text may read as repetitive.
+     Common words like "the" and "and" sitting at the top is normal and nothing to worry about.</p>
+</div>
+{% endif %}
+{% endif %}
+
+{{ m.where([
+  'Writing in Google Docs or Word? Select the text you want to check, copy it, and paste it above. Both apps have their own counters, but neither shows reading time or word frequency.',
+  'Checking a page that is already live? Open the page, select the body copy with your mouse, copy it, and paste it here. Leave out the menu and footer so the count reflects the article only.',
+  'Working on a meta description or title? Paste just that one line. The character count with spaces is the number search engines care about.',
+  'Writing a script or a talk? Use the speaking time to check your draft fits the slot you have been given.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

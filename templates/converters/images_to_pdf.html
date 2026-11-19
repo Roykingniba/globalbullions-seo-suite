@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Image to PDF Converter{% endblock %}
+{% block meta_description %}Combine one or more images into a single PDF file.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🖨️ Image to PDF</h1>
+  <p>Combine one or more images into a single PDF, in the order you select them.</p>
+</div>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+<form class="tool-form" method="post" enctype="multipart/form-data">
+  <label for="images">Image files (select multiple)</label>
+  <input type="file" id="images" name="images" accept="image/*" multiple style="margin-bottom:14px;">
+  <button class="btn" type="submit">Convert &amp; download PDF</button>
+</form>
+{% include "_tool_seo.html" %}
+{% endblock %}

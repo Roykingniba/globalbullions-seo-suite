@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import "utilities/_macros.html" as m %}
+{% block title %}Lorem Ipsum Generator{% endblock %}
+{% block meta_description %}Generate placeholder paragraphs, sentences or words for mockups and layout tests.{% endblock %}
+{% block content %}
+{{ m.head("📝", "Lorem Ipsum Generator", "Generate placeholder text for mockups and layout tests, by paragraph, sentence or word.") }}
+
+<form class="tool-form" method="post">
+  <div class="opt-row">
+    <div>
+      <label for="kind">Generate</label>
+      <select id="kind" name="kind">
+        <option value="paragraphs" {% if kind=='paragraphs' %}selected{% endif %}>Paragraphs</option>
+        <option value="sentences" {% if kind=='sentences' %}selected{% endif %}>Sentences</option>
+        <option value="words" {% if kind=='words' %}selected{% endif %}>Words</option>
+      </select>
+    </div>
+    <div>
+      <label for="count">How many</label>
+      <input type="number" id="count" name="count" min="1" max="200" value="{{ count }}">
+    </div>
+  </div>
+
+  {{ m.check("start_classic", "Start with the traditional \"Lorem ipsum dolor sit amet\" opening", start_classic) }}
+  <button class="btn" type="submit" style="margin-top:14px;">Generate</button>
+</form>
+
+{% if result %}{{ m.output(result, "Placeholder text", "lorem-out") }}{% endif %}
+
+<div class="where-card">
+  <h2>Why placeholder text is nonsense on purpose</h2>
+  <p>Lorem ipsum is scrambled Latin, so it has no meaning to distract you. When you fill a mockup with real, readable
+     copy, people start reviewing the writing instead of the layout. Nonsense text keeps the conversation on spacing,
+     line length and hierarchy, which is what a mockup is for.</p>
+  <p>It also roughly matches the letter and word length distribution of English, so a block of it takes up about as much
+     room as the real copy eventually will.</p>
+  <p><strong>One warning.</strong> Never let placeholder text reach a live page. Search engines will index it, and pages
+     full of lorem ipsum look abandoned to anyone who lands on them. Search your site for "lorem" before you launch.</p>
+</div>
+
+{{ m.where([
+  'You do not need to fetch anything for this tool. Pick a length and generate.',
+  'Not sure how much to generate? Count the words in the real copy you plan to use, with the Word and Character Counter, then generate the same amount so your mockup reflects reality.',
+  'Testing a heading or a card layout? Generate sentences rather than paragraphs, since a card usually holds one or two lines.',
+  'Testing how long titles wrap? Generate words and paste only as many as you need.',
+]) }}
+
+{% include "_tool_seo.html" %}
+{% endblock %}

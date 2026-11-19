@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Meta Tag & Open Graph Generator{% endblock %}
+{% block meta_description %}Generate a ready-to-paste title, meta description, canonical, Open Graph, and Twitter Card tag snippet.{% endblock %}
+{% block content %}
+<div class="tool-page-header">
+  <h1>🏷️ Meta Tag &amp; Open Graph Generator</h1>
+  <p>Fill in your page details and get a ready-to-paste &lt;head&gt; snippet. Title, meta description, canonical, Open Graph, and Twitter Card tags all in one.</p>
+</div>
+
+<form class="tool-form" method="post">
+  <label for="title">Page title</label>
+  <input type="text" id="title" name="title" value="{{ form.title }}" placeholder="Your page title">
+
+  <label for="description">Meta description</label>
+  <textarea id="description" name="description" placeholder="A compelling 150-160 character description">{{ form.description }}</textarea>
+
+  <label for="url">Canonical URL</label>
+  <input type="text" id="url" name="url" value="{{ form.url }}" placeholder="https://example.com/page">
+
+  <label for="image_url">Social share image URL (optional)</label>
+  <input type="text" id="image_url" name="image_url" value="{{ form.image_url }}" placeholder="https://example.com/image.jpg">
+
+  <label for="site_name">Site name (optional)</label>
+  <input type="text" id="site_name" name="site_name" value="{{ form.site_name }}" placeholder="Your Site Name">
+
+  <label for="twitter_handle">Twitter/X handle (optional)</label>
+  <input type="text" id="twitter_handle" name="twitter_handle" value="{{ form.twitter_handle }}" placeholder="@yourhandle">
+
+  <button class="btn" type="submit">Generate tags</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h2>Generated &lt;head&gt; snippet</h2>
+  <pre style="white-space:pre-wrap; word-break:break-all; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:13px;">{{ result }}</pre>
+</div>
+{% endif %}
+{% include "_tool_seo.html" %}
+{% endblock %}

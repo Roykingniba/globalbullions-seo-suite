@@ -1,0 +1,12 @@
+Hi {{ name }},
+
+Someone asked to reset the password for your Kai SEO Suite account. If that was you, open this link to choose a new password:
+
+{{ link }}
+
+The link works for {{ minutes }} minutes and can be used once.
+
+If you did not ask for this, ignore this email. Your password stays the same.
+
+Kai SEO Suite
+https://globalbullions.com
